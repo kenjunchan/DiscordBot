@@ -252,7 +252,7 @@ function changePogCoin(authorID, amount){
 			database.update({discordID: authorID}, {$inc: { pogcoins: amount}}, {multi: true}, function(err, numReplaced){console.log("Changed User: " + authorID + " pogcoins by " + amount)});
 		}
 		else{
-			receivedMessage.channel.send("Try typing !register");
+			receivedMessage.channel.send("Could not find user, Try typing !register");
 		}
 	})
 }
@@ -274,14 +274,21 @@ function pogCoinCommand(arguments, receivedMessage){
 
 
 function addOnePogCoin(arguments, receivedMessage){
-	changePogCoin(receivedMessage.author.id, parseInt(arguments[1]))
+	var aID;
+	if(arguments.length > 2){
+		var aID = arguments[2];
+	}
+	else{
+		var aID = receivedMessage.author.id;
+	}
+	changePogCoin(aID, parseInt(arguments[1]))
 }
 
 
 
 function checkCoins(arguments, receivedMessage){
-	if(arguments > 1){
-		checkUserCoins(arguments[1]);
+	if(arguments.length > 1){
+		checkUserCoins(arguments[1], receivedMessage);
 		return;
 	}
 	database.findOne({discordID: receivedMessage.author.id}, (err,data) =>{
@@ -294,7 +301,7 @@ function checkCoins(arguments, receivedMessage){
 	})
 }
 
-function checkUserCoins(authorID){
+function checkUserCoins(authorID, receivedMessage){
 	database.findOne({discordID: authorID}, (err,data) =>{
 		if(data != null){
 			receivedMessage.channel.send("User: "+ authorID + " has " + data.pogcoins + " pogcoins!")
