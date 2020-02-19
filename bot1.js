@@ -28,12 +28,15 @@ const allCommands = [helpCommands, opggCommands, allOpggCommands, championComman
 
 			
 const database = new Datastore('datastore.db');
-database.loadDatabase();		 
+database.loadDatabase();	 
+const dbCompactInterval = 60000; //number in miliseconds
 //*****************************************************************************************************************************
 client.on('ready', ()=> {
 	client.user.setActivity("with your mom lol")
 	listAllConnectedServersAndChannels()
 	console.log("DiscordBot Started")
+	console.log("Setting Automatic Database Persistence to " + dbCompactInterval + " ms")
+	database.persistence.setAutocompactionInterval(dbCompactInterval)
 })
 
 client.on('message', (receivedMessage) =>{
@@ -99,14 +102,14 @@ function checkIfExclamationPointExpression(receivedMessage){
 }
 
 function isInDB(arguments, receivedMessage){
-	console.log("Checking if " + receivedMessage.author.id + " is in Database")
+	console.log("Checking if " + receivedMessage.author.id + " is in Database...")
 	database.findOne({discordID: receivedMessage.author.id}, (err,data) =>{
 		if(data == null){
-			console.log('can not find' + receivedMessage.author.id +', adding new entry')
-			database.insert({discordID: receivedMessage.author.id, pogcoins: '0'});
+			console.log('--can not find user: ' + receivedMessage.author.id +', adding new entry')
+			database.insert({discordID: receivedMessage.author.id, pogcoins: 0});
 		}
 		else{
-			console.log('Found User: '+ data.discordID);
+			console.log('--found User: '+ data.discordID);
 		}
 	})
 	return true;
@@ -132,7 +135,8 @@ function getUserCoins(authorID){
 function testCommand(arguments, receivedMessage){
 	receivedMessage.channel.send("Test Command Executed!");
 	receivedMessage.channel.send("TEST COMMAND SENDER ID: " + receivedMessage.author.id);
-
+	let amount = 1;
+	database.update({discordID: receivedMessage.author.id}, {$inc: { pogcoins: amount}}, {multi: true}, function(err, numReplaced){console.log("Changed User: " + receivedMessage.author.id + " pogcoins by " + amount)});
 }
 //*****************************************************************************************************************************
 //Building myUser
@@ -242,9 +246,20 @@ function findCommand(primaryCommand){
 }
 
 
+function changePogCoin(authorID, amount){
+	database.findOne({discordID: authorID}, (err,data) =>{
+		if(data != null){
+			database.update({discordID: authorID}, {$inc: { pogcoins: amount}}, {multi: true}, function(err, numReplaced){console.log("Changed User: " + authorID + " pogcoins by " + amount)});
+		}
+		else{
+			receivedMessage.channel.send("Try typing !register");
+		}
+	})
+}
+
 //pogCoins POGGERS
 function pogCoinCommand(arguments, receivedMessage){
-	console.log("POG COIN COMMAND");
+	console.log("pogcoin command from user: " + receivedMessage.author.id);
 	switch(arguments[0]){
 		case "check":
 			checkCoins(arguments, receivedMessage)
@@ -257,24 +272,9 @@ function pogCoinCommand(arguments, receivedMessage){
 	}
 }
 
+
 function addOnePogCoin(arguments, receivedMessage){
-	//var user = getUser(arguments, receivedMessage);
-	//console.log(user);
-	var user;
-	database.findOne({discordID: receivedMessage.author.id}, (err,data) =>{
-		if(data != null){	
-			var user = data;
-			console.log(user);
-			database.update({discordID: receivedMessage.author.id}, {$inc: { pogcoins: 1}}, {multi: true}, function(err, numReplaced){console.log("ADDED 1 pogcoin to " + receivedMessage.author.id)});
-			//database.update({discordID: receivedMessage.author.id}, { $set: { pogcoins: ++data.pogcoins} }, {}, function ());
-		}
-		else{
-			receivedMessage.channel.send("Try typing !register");
-		}
-	})
-	//console.log(user);
-	//console.log(getUserCoins(receivedMessage.author.id));
-	//database.update({discordID: receivedMessage.author.id}, )
+	changePogCoin(receivedMessage.author.id, parseInt(arguments[1]))
 }
 
 function checkCoins(arguments, receivedMessage){
