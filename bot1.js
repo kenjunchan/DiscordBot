@@ -277,13 +277,30 @@ function addOnePogCoin(arguments, receivedMessage){
 	changePogCoin(receivedMessage.author.id, parseInt(arguments[1]))
 }
 
+
+
 function checkCoins(arguments, receivedMessage){
+	if(arguments > 1){
+		checkUserCoins(arguments[1]);
+		return;
+	}
 	database.findOne({discordID: receivedMessage.author.id}, (err,data) =>{
 		if(data != null){
 			receivedMessage.channel.send("You have: " + data.pogcoins + " pogcoins!")
 		}
 		else{
-			receivedMessage.channel.send("Try typing !register");
+			receivedMessage.channel.send("User not found, try typing !register");
+		}
+	})
+}
+
+function checkUserCoins(authorID){
+	database.findOne({discordID: authorID}, (err,data) =>{
+		if(data != null){
+			receivedMessage.channel.send("User: "+ authorID + " has " + data.pogcoins + " pogcoins!")
+		}
+		else{
+			receivedMessage.channel.send("User "+ authorID + " not found ");
 		}
 	})
 }
