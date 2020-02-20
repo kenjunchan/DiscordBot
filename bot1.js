@@ -6,7 +6,7 @@
 
 const Discord = require('discord.js')
 const client = new Discord.Client();
-client.login("NTY2MzUxMjE1MjgyMzU2MjI0.Xkn1TQ.zHZ1uuimyYW46lJ1db2S_48oARA")
+client.login("")
 
 const axios = require('axios');
 const Datastore = require('nedb');
