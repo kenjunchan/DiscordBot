@@ -1,8 +1,13 @@
 /**
  * 
  */
+
+
+
 const Discord = require('discord.js')
 const client = new Discord.Client();
+client.login("NTY2MzUxMjE1MjgyMzU2MjI0.Xkn1TQ.zHZ1uuimyYW46lJ1db2S_48oARA")
+
 const axios = require('axios');
 const Datastore = require('nedb');
 
@@ -27,34 +32,28 @@ const allCommands = [helpCommands, opggCommands, allOpggCommands, championComman
 					 pogPlantImageCommands, magic8BallCommands, dogCommands, catCommands, registerCommands, pCommands, emptyCommands];
 
 			
+//Load Database
 const database = new Datastore('datastore.db');
-database.loadDatabase();	 
+database.loadDatabase();
+
 const dbCompactInterval = 60000; //number in miliseconds
 //*****************************************************************************************************************************
 client.on('ready', ()=> {
-	client.user.setActivity("with your mom lol")
+	client.user.setActivity("XD")
 	listAllConnectedServersAndChannels()
 	console.log("DiscordBot Started")
-	console.log("Setting Automatic Database Persistence to " + dbCompactInterval + " ms")
+	console.log("Setting Automatic Database Compaction to " + dbCompactInterval + " ms")
 	database.persistence.setAutocompactionInterval(dbCompactInterval)
 })
 
 client.on('message', (receivedMessage) =>{
-	console.log("received message");
 	if(receivedMessage.author == client.user){
-		console.log("Message from self")
 		return
 	}
-	/*
-	if(checkIfExclamationPointExpression(receivedMessage) || checkIfSingleExclamationPoint(receivedMessage)){
-		console.log("checking exclamation points")
-		return
-	}
-	*/
 	else if(receivedMessage.content.startsWith("!")) { //!command
         processCommand(receivedMessage)
     }
-	if(receivedMessage.content.includes(client.user.toString())) { //if tagged
+	if(receivedMessage.content.includes(client.user.toString())) { //if bot is tagged in message
 		
 	}
 })
@@ -67,43 +66,6 @@ function listAllConnectedServersAndChannels(){
             console.log(` -- ${channel.name} (${channel.type}) - ${channel.id}`)
         })
     })
-}
-
-//this doesnt work
-function checkIfSingleExclamationPoint(receivedMessage){
-	let fullCommand = receivedMessage.content;
-	let splitCommand = fullCommand.split(" ");
-	let primaryCommand = findCommand(splitCommand[0]);
-	if(primaryCommand === ""){
-		return true
-	}
-	else{
-		return false
-	}
-}
-
-function checkIfExclamationPointExpression(receivedMessage){
-	let fullCommand = receivedMessage.content;
-	var numOfExclamationPoints = 0;
-	var numOfSpaces = 0;
-	var numOfOtherCharacters
-	for(var i = 0; i < fullCommand.length; i++){
-		if(fullCommand.charAt(i) == '!'){
-			numOfExclamationPoints += 1
-		}
-		if(fullCommand.charAt(i) == ' '){
-			numOfSpaces += 1
-		}
-		else{
-			numOfOtherCharacters += 1
-		}
-	}
-	if(numOfExclamationPoints >= 2 ){
-		return true
-	}
-	else{
-		return false
-	}
 }
 
 function getUserFromMention(mention) {
@@ -134,121 +96,31 @@ function isInDB(arguments, receivedMessage){
 	return true;
 }
 
-function getUserCoins(authorID){
-	console.log("getting user: " + authorID)
-	//if(isInDB(arguments, receivedMessage)){
-	var pogC =
-	database.findOne({discordID: authorID}, function (err,data) {
-			if(data != null){
-				pogC =  data.pogcoins;
-				//console.log(data.pogcoins);
-				return data.pogcoins;
-			}
-		});
-	return pogC;
-}
-
 function testCommand(arguments, receivedMessage){
 	receivedMessage.channel.send("Test Command Executed!");
 	receivedMessage.channel.send("TEST COMMAND SENDER ID: " + receivedMessage.author.id);
-	//console.log(getUserCoins(receivedMessage.author.id));
-	//giveUserPogcoins("125805688797659138","200297996213157888", 1 , receivedMessage);
-	//console.log(receivedMessage.mentions);
-	//console.log(getUserFromMention(arguments[0]).id);
 	database.insert({discordID: "566351215282356224", pogcoins: 0});
 
 
 }
 //*****************************************************************************************************************************
-
-function checkMultipleExclamationPoints(primaryCommand){
-	
-}
-
-//*****************************************************************************************************************************
-function processCommand(receivedMessage) {
-	let fullCommand = receivedMessage.content.substr(1) // Remove the leading exclamation mark
-	//let fullCommand = receivedMessage.content.slice(1);
-	//let splitCommand = fullCommand.split(" ") // Split the message up in to pieces for each space
-	let splitCommand = fullCommand.split(/ +/) // Split the message up in to pieces for each space
-    //*******************************************************************************************
-    let primaryCommand = findCommand(splitCommand[0].toLowerCase()) // The first word directly after the exclamation is the command
-	let arguments = splitCommand.slice(1) // All other words are arguments/parameters/options for the command
-	//console.log(arguments)
-	console.log(primaryCommand)
-	console.log(fullCommand)
-	if(fullCommand == null || fullCommand.startsWith("!", 0)){
-		return;
+//Pog Coin Commands
+//pogcoin processing
+function pogCoinCommand(arguments, receivedMessage){
+	console.log("pogcoin command from user: " + receivedMessage.author.id);
+	switch(arguments[0]){
+		case "check":
+			checkCoins(arguments, receivedMessage)
+			break;
+		case "add1":
+			addOnePogCoin(arguments, receivedMessage)
+			break;
+		case "give":
+			givePogcoins(arguments, receivedMessage)
+			break;
+		case "":
+			break;
 	}
-	if(splitCommand[0].toLowerCase() == "test"){
-    	testCommand(arguments, receivedMessage)
-	}
-    else{
-    switch(primaryCommand){
-    case "Invalid_Command":
-    	invalidCommand(arguments, receivedMessage)
-    	break;
-    case "help":
-    	helpCommand(arguments, receivedMessage)
-    	break;
-    case "opgg":
-    	opggCommand(arguments, receivedMessage)
-    	break;
-    case "aopgg":
-    	allOpggCommand(arguments, receivedMessage)
-    	break;
-    case "champ":
-    	champggCommand(arguments, receivedMessage)
-    	break;
-    case "tsquare":
-    	tianSquareCommand(arguments, receivedMessage)
-    	break;
-    case "meme":
-    	memeifyChatCommand(arguments, receivedMessage)
-    	break;
-    case "cr":
-    	caeserRodneyCommand(arguments, receivedMessage)
-    	break;
-    case "pencader":
-    	pencaderCommand(arguments, receivedMessage)
-    	break;
-    case "pogplant":
-    	pogPlantImageCommand(arguments, receivedMessage)
-    	break;
-    case "8":
-    	magic8BallCommand(arguments, receivedMessage)
-    	break;
-	case "dog":
-		dogCommand(arguments, receivedMessage)
-		break;
-	case "cat":
-		catCommand(arguments, receivedMessage)
-		break;
-	case "register":
-		isInDB(arguments, receivedMessage)
-		break;
-	case "pogcoins":
-		pogCoinCommand(arguments, receivedMessage)
-		break;
-    case "":
-    	break;
-	}
-	
-    }
-}
-
-function findCommand(primaryCommand){
-	
-	for(var listNum = 0; listNum < allCommands.length; listNum++){
-	//List of Commands
-		for(var commandNum = 0; commandNum < allCommands[listNum].length; commandNum++){
-		//Command in List
-			if(primaryCommand == allCommands[listNum][commandNum]){
-				return allCommands[listNum][0]
-			}
-		}
-	}
-	return "Invalid_Command"
 }
 
 function givePogcoins(arguments, receivedMessage){
@@ -278,7 +150,7 @@ function giveUserPogcoins(user1, user2, amount, receivedMessage){
 				console.log("User: " + user1 + " giving User: " + user2 + " " + amount + " pogcoins");
 				changePogCoin(user2, amount);
 				changePogCoin(user1, -amount);
-				receivedMessage.channel.send("Sent pogcoins")
+				receivedMessage.channel.send("-- sent pogcoins!")
 			}
 		}
 	});
@@ -294,25 +166,6 @@ function changePogCoin(authorID, amount){
 		}
 	})
 }
-
-//pogCoins POGGERS
-function pogCoinCommand(arguments, receivedMessage){
-	console.log("pogcoin command from user: " + receivedMessage.author.id);
-	switch(arguments[0]){
-		case "check":
-			checkCoins(arguments, receivedMessage)
-			break;
-		case "add1":
-			addOnePogCoin(arguments, receivedMessage)
-			break;
-		case "give":
-			givePogcoins(arguments, receivedMessage)
-			break;
-		case "":
-			break;
-	}
-}
-
 
 function addOnePogCoin(arguments, receivedMessage){
 	var aID;
@@ -352,6 +205,85 @@ function checkUserCoins(author, receivedMessage){
 		}
 	})
 }
+
+//*****************************************************************************************************************************
+function processCommand(receivedMessage) {
+	let fullCommand = receivedMessage.content.substr(1) // Remove the leading exclamation mark
+	//let splitCommand = fullCommand.split(" ") // Split the message up in to pieces for each space
+	let splitCommand = fullCommand.split(/ +/) // Split the message up in to pieces for each space
+    let primaryCommand = findCommand(splitCommand[0].toLowerCase()) // The first word directly after the exclamation is the command
+	let arguments = splitCommand.slice(1) // All other words are arguments/parameters/options for the command
+	//console.log(arguments)
+	if(fullCommand == null || fullCommand.startsWith("!", 0)){
+		return;
+	}
+	if(splitCommand[0].toLowerCase() == "test"){
+    	testCommand(arguments, receivedMessage)
+	}
+    else{
+		console.log("Command Received from User: " + receivedMessage.author.id + " \n --Command: " + primaryCommand + " with Arguments: " + arguments)
+		switch(primaryCommand){
+			case "Invalid_Command":
+    			invalidCommand(arguments, receivedMessage)
+    			break;
+    		case "help":
+    			helpCommand(arguments, receivedMessage)
+    			break;
+  			case "opgg":
+    			opggCommand(arguments, receivedMessage)
+    			break;
+    		case "aopgg":
+    			allOpggCommand(arguments, receivedMessage)
+    			break;
+   			case "champ":
+    			champggCommand(arguments, receivedMessage)
+    			break;
+    		case "meme":
+    			memeifyChatCommand(arguments, receivedMessage)
+    			break;
+    		case "cr":
+    			caeserRodneyCommand(arguments, receivedMessage)
+    			break;
+    		case "pencader":
+    			pencaderCommand(arguments, receivedMessage)
+    			break;
+    		case "pogplant":
+    			pogPlantImageCommand(arguments, receivedMessage)
+    			break;
+    		case "8":
+    			magic8BallCommand(arguments, receivedMessage)
+    			break;
+			case "dog":
+				dogCommand(arguments, receivedMessage)
+				break;
+			case "cat":
+				catCommand(arguments, receivedMessage)
+				break;
+			case "register":
+				isInDB(arguments, receivedMessage)
+				break;
+			case "pogcoins":
+				pogCoinCommand(arguments, receivedMessage)
+				break;
+    		case "":
+    			break;
+		}
+    }
+}
+
+function findCommand(primaryCommand){
+	for(var listNum = 0; listNum < allCommands.length; listNum++){
+	//List of Commands
+		for(var commandNum = 0; commandNum < allCommands[listNum].length; commandNum++){
+		//Command in List
+			if(primaryCommand == allCommands[listNum][commandNum]){
+				return allCommands[listNum][0]
+			}
+		}
+	}
+	return "Invalid_Command"
+}
+
 
 //command functions
 function invalidCommand(arguments, receivedMessage){
@@ -452,7 +384,6 @@ function memeifyChatCommand(arguments, receivedMessage){
 			else{
 				returnMsg = returnMsg + msg.charAt(i).toUpperCase();
 			}
-				
 		}
 		else{
 			returnMsg = returnMsg + " ";
@@ -535,4 +466,3 @@ function magic8BallCommand(arguments, receivedMessage){
 	
 	receivedMessage.channel.send({embed});
 }
-client.login("")
