@@ -40,12 +40,17 @@ client.on('ready', ()=> {
 })
 
 client.on('message', (receivedMessage) =>{
+	console.log("received message");
 	if(receivedMessage.author == client.user){
+		console.log("Message from self")
 		return
 	}
+	/*
 	if(checkIfExclamationPointExpression(receivedMessage) || checkIfSingleExclamationPoint(receivedMessage)){
+		console.log("checking exclamation points")
 		return
 	}
+	*/
 	else if(receivedMessage.content.startsWith("!")) { //!command
         processCommand(receivedMessage)
     }
@@ -101,6 +106,20 @@ function checkIfExclamationPointExpression(receivedMessage){
 	}
 }
 
+function getUserFromMention(mention) {
+	if (!mention) return;
+
+	if (mention.startsWith('<@') && mention.endsWith('>')) {
+		mention = mention.slice(2, -1);
+
+		if (mention.startsWith('!')) {
+			mention = mention.slice(1);
+		}
+
+		return client.users.get(mention);
+	}
+}
+
 function isInDB(arguments, receivedMessage){
 	console.log("Checking if " + receivedMessage.author.id + " is in Database...")
 	database.findOne({discordID: receivedMessage.author.id}, (err,data) =>{
@@ -118,66 +137,52 @@ function isInDB(arguments, receivedMessage){
 function getUserCoins(authorID){
 	console.log("getting user: " + authorID)
 	//if(isInDB(arguments, receivedMessage)){
-		database.findOne({discordID: authorID}, (err,data) =>{
+	var pogC =
+	database.findOne({discordID: authorID}, function (err,data) {
 			if(data != null){
-				//console.log(data);
-				var user = data;
-				//console.log(user);		
-				return user.pogcoins;
+				pogC =  data.pogcoins;
+				//console.log(data.pogcoins);
+				return data.pogcoins;
 			}
-			else{
-				//receivedMessage.channel.send("Try typing !register");
-			}
-		})
-	//}
+		});
+	return pogC;
 }
 
 function testCommand(arguments, receivedMessage){
 	receivedMessage.channel.send("Test Command Executed!");
 	receivedMessage.channel.send("TEST COMMAND SENDER ID: " + receivedMessage.author.id);
-	let amount = 1;
-	database.update({discordID: receivedMessage.author.id}, {$inc: { pogcoins: amount}}, {multi: true}, function(err, numReplaced){console.log("Changed User: " + receivedMessage.author.id + " pogcoins by " + amount)});
+	//console.log(getUserCoins(receivedMessage.author.id));
+	//giveUserPogcoins("125805688797659138","200297996213157888", 1 , receivedMessage);
+	//console.log(receivedMessage.mentions);
+	//console.log(getUserFromMention(arguments[0]).id);
+	database.insert({discordID: "566351215282356224", pogcoins: 0});
+
+
 }
 //*****************************************************************************************************************************
-//Building myUser
-/*
-function myUser(UID2, ttv2, mopgg2, aopgg2){
-	this.UID = UID2;
-	this.ttv = ttv2;
-	this.mopgg = mopgg2;
-	this.aopgg = aopgg2;
-}
-var myUserList = [];
 
-function addMyUser(){
-	var myUser1 = new myUser("125805688797659138","test1","test2",["test3","test4","test5"]);
-	myUserList.push(myUser1)
+function checkMultipleExclamationPoints(primaryCommand){
+	
 }
 
-function writeMyUserListToTextFile(){
-	var fs = require('fs');
-	var data;
-	for(var i = 0; i < myUserList.length - 1; i++){
-		data += myUserList[i].UID + "," + myUserList[i].ttv + "," + myUserList[i].mopgg + "," + myUserList[i].aopgg + "\n"
-	}
-	fs.writeFile('myUsers.txt', data, function(){console.log('done')})
-}
-
-function clearTextFile(){
-	var fs = require('fs');
-	fs.writeFile('myUsers.txt', '', function(){console.log('done')})
-}
-*/
 //*****************************************************************************************************************************
 function processCommand(receivedMessage) {
-    let fullCommand = receivedMessage.content.substr(1) // Remove the leading exclamation mark
-    let splitCommand = fullCommand.split(" ") // Split the message up in to pieces for each space
+	let fullCommand = receivedMessage.content.substr(1) // Remove the leading exclamation mark
+	//let fullCommand = receivedMessage.content.slice(1);
+	//let splitCommand = fullCommand.split(" ") // Split the message up in to pieces for each space
+	let splitCommand = fullCommand.split(/ +/) // Split the message up in to pieces for each space
     //*******************************************************************************************
     let primaryCommand = findCommand(splitCommand[0].toLowerCase()) // The first word directly after the exclamation is the command
-    let arguments = splitCommand.slice(1) // All other words are arguments/parameters/options for the command
-    if(splitCommand[0].toLowerCase() == "test"){
+	let arguments = splitCommand.slice(1) // All other words are arguments/parameters/options for the command
+	//console.log(arguments)
+	console.log(primaryCommand)
+	console.log(fullCommand)
+	if(fullCommand == null || fullCommand.startsWith("!", 0)){
+		return;
+	}
+	if(splitCommand[0].toLowerCase() == "test"){
     	testCommand(arguments, receivedMessage)
-    }
+	}
     else{
     switch(primaryCommand){
     case "Invalid_Command":
@@ -227,7 +232,8 @@ function processCommand(receivedMessage) {
 		break;
     case "":
     	break;
-    }
+	}
+	
     }
 }
 
@@ -245,6 +251,38 @@ function findCommand(primaryCommand){
 	return "Invalid_Command"
 }
 
+function givePogcoins(arguments, receivedMessage){
+	let amount = parseInt(arguments[1]);
+	let userID1 = receivedMessage.author.id;
+	let userID2 = receivedMessage.mentions.users.first().id.toString();
+	giveUserPogcoins(userID1, userID2, amount, receivedMessage);
+}
+
+function giveUserPogcoins(user1, user2, amount, receivedMessage){
+	
+	if(amount <= 0){
+		receivedMessage.channel.send("Invalid Amount");
+		return;
+	}
+	if(user1 == user2){
+		receivedMessage.channel.send("cant give to yourself");
+		return;
+	}
+	database.findOne({discordID: user1}, function (err,data) {
+		if(data != null){
+			if(amount > data.pogcoins){
+				receivedMessage.channel.send("Insufficient pogcoins to give");
+				return;
+			}
+			else{
+				console.log("User: " + user1 + " giving User: " + user2 + " " + amount + " pogcoins");
+				changePogCoin(user2, amount);
+				changePogCoin(user1, -amount);
+				receivedMessage.channel.send("Sent pogcoins")
+			}
+		}
+	});
+}
 
 function changePogCoin(authorID, amount){
 	database.findOne({discordID: authorID}, (err,data) =>{
@@ -267,6 +305,9 @@ function pogCoinCommand(arguments, receivedMessage){
 		case "add1":
 			addOnePogCoin(arguments, receivedMessage)
 			break;
+		case "give":
+			givePogcoins(arguments, receivedMessage)
+			break;
 		case "":
 			break;
 	}
@@ -288,7 +329,7 @@ function addOnePogCoin(arguments, receivedMessage){
 
 function checkCoins(arguments, receivedMessage){
 	if(arguments.length > 1){
-		checkUserCoins(arguments[1], receivedMessage);
+		checkUserCoins(receivedMessage.mentions.users.first(), receivedMessage);
 		return;
 	}
 	database.findOne({discordID: receivedMessage.author.id}, (err,data) =>{
@@ -301,13 +342,13 @@ function checkCoins(arguments, receivedMessage){
 	})
 }
 
-function checkUserCoins(authorID, receivedMessage){
-	database.findOne({discordID: authorID}, (err,data) =>{
+function checkUserCoins(author, receivedMessage){
+	database.findOne({discordID: author.id.toString()}, (err,data) =>{
 		if(data != null){
-			receivedMessage.channel.send("User: "+ authorID + " has " + data.pogcoins + " pogcoins!")
+			receivedMessage.channel.send("User: "+ author.username + " has " + data.pogcoins + " pogcoins!")
 		}
 		else{
-			receivedMessage.channel.send("User "+ authorID + " not found ");
+			receivedMessage.channel.send("User "+ author.username + " not found ");
 		}
 	})
 }
