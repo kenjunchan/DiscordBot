@@ -6,7 +6,8 @@
 
 const Discord = require('discord.js')
 const client = new Discord.Client();
-client.login("")
+client.login("NTY2MzUxMjE1MjgyMzU2MjI0.Xl7E8g.WvHQgOfbePnE8mq4rImi4CG-TKA") //Discord Token Here
+const riotAPIKey = "RGAPI-8a40e20e-aae8-4fc0-8c71-ed9a1bf054c4";
 
 const axios = require('axios');
 const Datastore = require('nedb');
@@ -21,7 +22,7 @@ const memeifyCommands = ["meme", "me"];
 const caesarRodneyCommands = ["cr", "caesar", "cesar"];
 const pencaderCommands = ["pencader", "pen"];
 const pogPlantImageCommands = ["pogplant", "pp"];
-const magic8BallCommands = ["8", "magic", "8ball", "magic8ball", "m8"];
+const magic8BallCommands = ["8ball", "magic", "8", "magic8ball", "m8"];
 const dogCommands = ["dog"];
 const catCommands = ["cat"];
 const registerCommands = ["register"];
@@ -96,13 +97,74 @@ function isInDB(arguments, receivedMessage){
 	return true;
 }
 
-function testCommand(arguments, receivedMessage){
-	receivedMessage.channel.send("Test Command Executed!");
-	receivedMessage.channel.send("TEST COMMAND SENDER ID: " + receivedMessage.author.id);
-	database.insert({discordID: "566351215282356224", pogcoins: 0});
-
-
+async function testCommand(arguments, receivedMessage){
+	let s1 = await getSummonerFromName(arguments[0]);
+	let m1 = await getMatchListFromSummoner(s1);
+	getWinrateFromMatchlist(m1, s1);
+	//receivedMessage.channel.send(summoner.id + " " + summoner.accountId);
 }
+//*****************************************************************************************************************************
+//RIOT API STUFF
+async function getSummonerFromName(summonerName){
+	let getSummonerData = async () => {
+		let summonerDataAPI = "https://na1.api.riotgames.com/lol/summoner/v4/summoners/by-name/"+arguments[0]+"?api_key="+riotAPIKey;
+		//console.log(summonerDataAPI);
+		let response = await axios.get(summonerDataAPI);
+		let summonerData = response.data
+		//console.log(summonerData);
+		return summonerData;
+	};
+	let summoner = await getSummonerData();
+	//receivedMessage.channel.send(summoner.id + " " + summoner.accountId);
+	//console.log(summoner);
+	return summoner;
+}
+async function getMatchListFromSummoner(summoner){
+	let getMatchList = async() => {
+		let matchListAPI = "https://na1.api.riotgames.com/lol/match/v4/matchlists/by-account/" + summoner.accountId + "?queue=420&season=13&api_key=" + riotAPIKey;
+		//console.log(matchListAPI);
+		let response = await axios.get(matchListAPI);
+		let matchlistData = response.data;
+		return matchlistData;
+	};
+	let matchlist = await getMatchList();
+	//console.log(matchlist.matches);
+	return matchlist.matches;
+}
+
+function getWinrateFromMatchlist(matchlist, summoner){
+	//console.log(matchlist)
+	/*
+	for (var match in matchlist){
+		console.log(match.gameId);
+	}
+	*/
+	for(var i = 0; i < matchlist.length; i++){
+		var match = matchlist[i];
+		console.log(match.gameId);
+	}
+}
+
+async function getMatchDataFromGameId(gameid){
+	let getMatchData = async() => {
+		let matchDataAPI = "https://na1.api.riotgames.com/lol/match/v4/matches/" + gameId + "?api_key=" + riotAPIKey;
+		//console.log(matchListAPI);
+		let response = await axios.get(matchDataAPI);
+		let matchData = response.data;
+		return matchData;
+	};
+	let matchData = await getMatchList();
+	//console.log(matchlist.matches);
+	return matchData;
+}
+
+function getparticipantIdFromParticipantandSummoner(participants, summoner){
+	for(var i = 0; i < participants.length; i++){
+		//var participant
+	}
+}
+
+
 //*****************************************************************************************************************************
 //Pog Coin Commands
 //pogcoin processing
@@ -113,7 +175,8 @@ function pogCoinCommand(arguments, receivedMessage){
 			checkCoins(arguments, receivedMessage)
 			break;
 		case "add1":
-			addOnePogCoin(arguments, receivedMessage)
+			addOne
+			PogCoin(arguments, receivedMessage)
 			break;
 		case "give":
 			givePogcoins(arguments, receivedMessage)
@@ -250,7 +313,7 @@ function processCommand(receivedMessage) {
     		case "pogplant":
     			pogPlantImageCommand(arguments, receivedMessage)
     			break;
-    		case "8":
+    		case "8ball":
     			magic8BallCommand(arguments, receivedMessage)
     			break;
 			case "dog":
@@ -419,7 +482,6 @@ async function dogCommand(arguments, receivedMessage){
 	};
 	let dogImg = await getDog();
 	receivedMessage.channel.send(dogImg.message);
-	
 }
 
 async function catCommand(arguments, receivedMessage){
