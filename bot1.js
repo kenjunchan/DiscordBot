@@ -124,13 +124,13 @@ async function getSummonerFromName(summonerName){
 async function getMatchListFromSummoner(summoner){
 	let getMatchList = async() => {
 		let matchListAPI = "https://na1.api.riotgames.com/lol/match/v4/matchlists/by-account/" + summoner.accountId + "?queue=420&season=13&api_key=" + riotAPIKey;
-		//console.log(matchListAPI);
+		console.log(matchListAPI);
 		let response = await axios.get(matchListAPI);
 		let matchlistData = response.data;
 		return matchlistData;
 	};
 	let matchlist = await getMatchList();
-	//console.log(matchlist.matches);
+	console.log(matchlist.matches);
 	return matchlist.matches;
 }
 
@@ -478,7 +478,7 @@ function pogPlantImageCommand(arguments, receivedMessage){
 async function dogCommand(arguments, receivedMessage){
 	let getDog = async () => {
 		let dogAPI = 'https://dog.ceo/api/breed/hound/images/random';
-		if(arguments.length == 1){
+		if(arguments.length >= 1){
 			dogAPI = 'https://dog.ceo/api/breed/' + arguments[0] + '/images/random'
 		}
 		else{
