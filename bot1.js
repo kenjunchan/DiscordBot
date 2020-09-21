@@ -6,8 +6,8 @@
 
 const Discord = require('discord.js')
 const client = new Discord.Client();
-client.login("") //Discord Token Here
-const riotAPIKey = "RGAPI-8a40e20e-aae8-4fc0-8c71-ed9a1bf054c4";
+client.login("NTY2MzUxMjE1MjgyMzU2MjI0.XmAeMQ.fkoVuWv9sY3tMNFeDVSoB47AICQ") //Discord Token Here
+const riotAPIKey = "RGAPI-9eb1512d-9f27-47c0-8b82-fb30cb9482fe";
 
 const axios = require('axios');
 const Datastore = require('nedb');
@@ -142,19 +142,20 @@ function getWinrateFromMatchlist(matchlist, summoner){
 	for(var i = 0; i < matchlist.length; i++){
 		var match = matchlist[i];
 		console.log(match.gameId);
+		//var matchData = getMatchDataFromGameId(match.gameId);
+
 	}
 }
 
 async function getMatchDataFromGameId(gameid){
 	let getMatchData = async() => {
-		let matchDataAPI = "https://na1.api.riotgames.com/lol/match/v4/matches/" + gameId + "?api_key=" + riotAPIKey;
-		//console.log(matchListAPI);
+		let matchDataAPI = "https://na1.api.riotgames.com/lol/match/v4/matches/" + gameid + "?api_key=" + riotAPIKey;
+		console.log(matchDataAPI);
 		let response = await axios.get(matchDataAPI);
 		let matchData = response.data;
 		return matchData;
 	};
-	let matchData = await getMatchList();
-	//console.log(matchlist.matches);
+	let matchData = await getMatchData();
 	return matchData;
 }
 
