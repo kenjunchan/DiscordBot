@@ -178,8 +178,7 @@ function pogCoinCommand(arguments, receivedMessage){
 			checkCoins(arguments, receivedMessage)
 			break;
 		case "add1":
-			addOne
-			PogCoin(arguments, receivedMessage)
+			addOnePogCoin(arguments, receivedMessage)
 			break;
 		case "give":
 			givePogcoins(arguments, receivedMessage)
