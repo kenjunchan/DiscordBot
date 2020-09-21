@@ -6,8 +6,8 @@
 
 const Discord = require('discord.js')
 const client = new Discord.Client();
-client.login("NTY2MzUxMjE1MjgyMzU2MjI0.XmAeMQ.fkoVuWv9sY3tMNFeDVSoB47AICQ") //Discord Token Here
-const riotAPIKey = "RGAPI-9eb1512d-9f27-47c0-8b82-fb30cb9482fe";
+client.login("") //Discord Token Here
+const riotAPIKey = "";
 
 const axios = require('axios');
 const Datastore = require('nedb');
@@ -27,10 +27,12 @@ const dogCommands = ["dog"];
 const catCommands = ["cat"];
 const registerCommands = ["register"];
 const pCommands = ["pogcoins", "p"];
+const coinflipCommands = ["coin"]
+const rollCommands = ["roll"]
 const emptyCommands = [""];
 
 const allCommands = [helpCommands, opggCommands, allOpggCommands, championCommands, memeifyCommands, caesarRodneyCommands, pencaderCommands,
-					 pogPlantImageCommands, magic8BallCommands, dogCommands, catCommands, registerCommands, pCommands, emptyCommands];
+					 pogPlantImageCommands, magic8BallCommands, dogCommands, catCommands, registerCommands, pCommands, coinflipCommands, rollCommands, emptyCommands];
 
 			
 //Load Database
@@ -329,6 +331,12 @@ function processCommand(receivedMessage) {
 			case "pogcoins":
 				pogCoinCommand(arguments, receivedMessage)
 				break;
+			case "coin":
+				coinflipCommand(arguments, receivedMessage)
+				break;
+			case "roll":
+				rollCommand(arguments, receivedMessage)
+				break;
     		case "":
     			break;
 		}
@@ -496,6 +504,25 @@ async function catCommand(arguments, receivedMessage){
 	let catImg = await getCat();
 	receivedMessage.channel.send(catImg.url);
 }
+
+function coinflipCommand(arguments, receivedMessage){
+	const m8ballCommand = Math.floor(Math.random() * 2);
+	console.log(m8ballCommand);
+	
+	if(m8ballCommand == 1){
+		receivedMessage.channel.send(new Discord.Attachment('\images\\heads.jpg'))
+	}
+	else{
+		receivedMessage.channel.send(new Discord.Attachment('\images\\tails.png'))
+	}
+	
+}
+
+function rollCommand(arguments, receivedMessage){
+	receivedMessage.channel.send(receivedMessage.author.username + " rolled: " + Math.floor(Math.random() * parseInt(arguments[0],10) + 1) + " out of "+ arguments[0]);
+}
+
+
 function magic8BallCommand(arguments, receivedMessage){
 	const m8ballCommand = Math.floor(Math.random() * 20);
 	const m8ballColor = (m8ballCommand % 4);
