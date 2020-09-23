@@ -6,7 +6,7 @@
 
 const Discord = require('discord.js')
 const client = new Discord.Client();
-client.login("NzU4Mzg2NzU5OTEzOTYzNTIw.X2uMtQ.vNZMXzTIFdEFLTvw_FOTN0LLFfw") //Discord Token Here
+client.login("") //Discord Token Here
 const riotAPIKey = "";
 
 const axios = require('axios');
