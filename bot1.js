@@ -476,21 +476,31 @@ function pencaderCommand(arguments, receivedMessage){
 	receivedMessage.channel.send("https://udel.campusdish.com/LocationsAndMenus/PencaderResidentialDining")
 }
 function pogPlantImageCommand(arguments, receivedMessage){
-	receivedMessage.channel.send(new Discord.Attachment('\images\\pogplant.jpg'))
+	receivedMessage.channel.send(new Discord.Attachment('images/pogplant.jpg'))
 }
 
 async function dogCommand(arguments, receivedMessage){
 	let getDog = async () => {
-		let dogAPI = 'https://dog.ceo/api/breed/hound/images/random';
+		let dogAPI = "https://dog.ceo/api/breeds/image/random";
 		if(arguments.length == 1){
+			/*
+			if(arguments[0] == 'john'){
+				receivedMessage.channel.send("https://na.op.gg/summoner/userName=kamba")
+				return;
+			}
+			else{
+				dogAPI = 'https://dog.ceo/api/breed/' + arguments[0] + '/images/random'
+			}
+			*/
 			dogAPI = 'https://dog.ceo/api/breed/' + arguments[0] + '/images/random'
 		}
 		else if(arguments.length == 2){
 			dogAPI = 'https://dog.ceo/api/breed/' + arguments[1] + '/' + arguments[0] + '/images/random'
 		}
 		else{
-			receivedMessage.channel.send("Either dog does not exist or I broke :(");
+			//receivedMessage.channel.send("Either dog does not exist or I broke :(");
 		}
+
 		try{
 			let response = await axios.get(dogAPI);
 			let dogData = response.data
@@ -524,7 +534,7 @@ async function catCommand(arguments, receivedMessage){
 function coinflipCommand(arguments, receivedMessage){
 	const m8ballCommand = Math.floor(Math.random() * 2);
 	if(m8ballCommand == 1){
-		receivedMessage.channel.send(new Discord.Attachment('images//heads.jpg'))
+		receivedMessage.channel.send(new Discord.Attachment('images/heads.jpg'))
 		console.log(" --flipped heads")
 	}
 	else{
