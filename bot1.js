@@ -6,7 +6,7 @@
 
 const Discord = require('discord.js')
 const client = new Discord.Client();
-client.login("") //Discord Token Here
+client.login("NzU4Mzg2NzU5OTEzOTYzNTIw.X2uMtQ.vNZMXzTIFdEFLTvw_FOTN0LLFfw") //Discord Token Here
 const riotAPIKey = "";
 
 const axios = require('axios');
@@ -482,11 +482,14 @@ function pogPlantImageCommand(arguments, receivedMessage){
 async function dogCommand(arguments, receivedMessage){
 	let getDog = async () => {
 		let dogAPI = 'https://dog.ceo/api/breed/hound/images/random';
-		if(arguments.length >= 1){
+		if(arguments.length == 1){
 			dogAPI = 'https://dog.ceo/api/breed/' + arguments[0] + '/images/random'
 		}
+		else if(arguments.length == 2){
+			dogAPI = 'https://dog.ceo/api/breed/' + arguments[1] + '/' + arguments[0] + '/images/random'
+		}
 		else{
-			dogAPI = 'https://dog.ceo/api/breeds/image/random'
+			receivedMessage.channel.send("Either dog does not exist or I broke :(");
 		}
 		try{
 			let response = await axios.get(dogAPI);
