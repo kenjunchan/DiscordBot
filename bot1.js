@@ -42,7 +42,7 @@ database.loadDatabase();
 const dbCompactInterval = 60000; //number in miliseconds
 //*****************************************************************************************************************************
 client.on('ready', ()=> {
-	client.user.setActivity("XD")
+	client.user.setActivity("dont look at me im ugly")
 	listAllConnectedServersAndChannels()
 	console.log("DiscordBot Started")
 	console.log("Setting Automatic Database Compaction to " + dbCompactInterval + " ms")
@@ -319,7 +319,11 @@ function processCommand(receivedMessage) {
     			magic8BallCommand(arguments, receivedMessage)
     			break;
 			case "dog":
+				try{
 				dogCommand(arguments, receivedMessage)
+				} catch (e) {
+					console.error(e)
+				}
 				break;
 			case "cat":
 				catCommand(arguments, receivedMessage)
@@ -484,12 +488,22 @@ async function dogCommand(arguments, receivedMessage){
 		else{
 			dogAPI = 'https://dog.ceo/api/breeds/image/random'
 		}
-		let response = await axios.get(dogAPI);
-		let dogData = response.data
-		return dogData;
+		try{
+			let response = await axios.get(dogAPI);
+			let dogData = response.data
+			return dogData;
+		} catch (err) {
+			console.log("error getting dog from api");
+		}
 	};
-	let dogImg = await getDog();
-	receivedMessage.channel.send(dogImg.message);
+	let dogImg;
+	try{
+		dogImg = await getDog();
+		receivedMessage.channel.send(dogImg.message);
+	} catch (err) {
+		console.log("error with reading dog message")
+		receivedMessage.channel.send("Either dog does not exist or I broke :(");
+	}
 }
 
 async function catCommand(arguments, receivedMessage){
@@ -506,13 +520,13 @@ async function catCommand(arguments, receivedMessage){
 
 function coinflipCommand(arguments, receivedMessage){
 	const m8ballCommand = Math.floor(Math.random() * 2);
-	console.log(m8ballCommand);
-	
 	if(m8ballCommand == 1){
-		receivedMessage.channel.send(new Discord.Attachment('\images\\heads.jpg'))
+		receivedMessage.channel.send(new Discord.Attachment('images//heads.jpg'))
+		console.log(" --flipped heads")
 	}
 	else{
-		receivedMessage.channel.send(new Discord.Attachment('\images\\tails.png'))
+		receivedMessage.channel.send(new Discord.Attachment('images/tails.png'))
+		console.log(" --flipped tails")
 	}
 	
 }
