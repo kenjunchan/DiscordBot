@@ -480,6 +480,25 @@ function pogPlantImageCommand(arguments, receivedMessage){
 }
 
 async function dogCommand(arguments, receivedMessage){
+	if(arguments[0] == 'john' || arguments[0] == 'kamba'){
+		receivedMessage.channel.send("https://na.op.gg/summoner/userName=kamba")
+		return;
+	}
+	else if(arguments[0] == 'yuri' || arguments[0] == 'yoori'){
+		receivedMessage.channel.send("https://na.op.gg/summoner/userName=yuri%20the%20dog")
+		return;
+	}
+	else if(arguments[0] == 'yj' || arguments[0] == 'kalbean' || arguments[0] == 'yunjin'){
+		try{
+			receivedMessage.channel.send(new Discord.Attachment('images/heads.png'))
+		}
+		catch(e){
+			console.log(e)
+		}
+		finally{
+			return;
+		}
+	}
 	let getDog = async () => {
 		let dogAPI = "https://dog.ceo/api/breeds/image/random";
 		if(arguments.length == 1){
@@ -534,7 +553,7 @@ async function catCommand(arguments, receivedMessage){
 function coinflipCommand(arguments, receivedMessage){
 	const m8ballCommand = Math.floor(Math.random() * 2);
 	if(m8ballCommand == 1){
-		receivedMessage.channel.send(new Discord.Attachment('images/heads.jpg'))
+		receivedMessage.channel.send(new Discord.Attachment('images/heads.png'))
 		console.log(" --flipped heads")
 	}
 	else{
