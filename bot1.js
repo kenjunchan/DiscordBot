@@ -476,7 +476,7 @@ function pencaderCommand(arguments, receivedMessage){
 	receivedMessage.channel.send("https://udel.campusdish.com/LocationsAndMenus/PencaderResidentialDining")
 }
 function pogPlantImageCommand(arguments, receivedMessage){
-	receivedMessage.channel.send(new Discord.Attachment('images/pogplant.jpg'))
+	receivedMessage.channel.send(new Discord.Attachment('images/pogplant.png'))
 }
 
 async function dogCommand(arguments, receivedMessage){
