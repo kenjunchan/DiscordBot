@@ -476,6 +476,10 @@ function pencaderCommand(arguments, receivedMessage){
 	receivedMessage.channel.send("https://udel.campusdish.com/LocationsAndMenus/PencaderResidentialDining")
 }
 function pogPlantImageCommand(arguments, receivedMessage){
+	if(arguments[0] == 'bonk'){
+		receivedMessage.channel.send(new Discord.Attachment('images/bonk.jpg'))
+		return;
+	}
 	receivedMessage.channel.send(new Discord.Attachment('images/pogplant.png'))
 }
 
