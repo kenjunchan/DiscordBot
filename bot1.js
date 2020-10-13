@@ -6,7 +6,7 @@
 
 const Discord = require('discord.js')
 const client = new Discord.Client();
-client.login("NTY2MzUxMjE1MjgyMzU2MjI0.XLDtrA.F1emonXcYc-Ml-sQ6IhrjGN8aZ4") //Discord Token Here
+client.login("") //Discord Token Here
 const riotAPIKey = "";
 const ytdl = require("ytdl-core");
 const axios = require('axios');
@@ -605,7 +605,7 @@ function musicCommand(arguments, receivedMessage) {
 				var server = servers[receivedMessage.guild.id];
 				server.dispatcher = connection.play(ytdl(server.queue[0], { filter: "audioonly" }));
 				server.queue.shift();
-				server.dispatcher.on("end", function () {
+				server.dispatcher.on("finish", function () {
 					if (server.queue[0]) {
 						playSong(connection, receivedMessage);
 					}
@@ -738,7 +738,7 @@ function magic8BallCommand(arguments, receivedMessage) {
 			break;
 	}
 
-	const embed = new Discord.RichEmbed()
+	const embed = new Discord.MessageEmbed()
 		.setColor(m8ballC)
 		.setAuthor("Magic Pog-Ball", "https://i.imgur.com/HAve7tX.png")
 		.setThumbnail("https://i.imgur.com/HAve7tX.png")
