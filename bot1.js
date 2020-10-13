@@ -6,7 +6,7 @@
 
 const Discord = require('discord.js')
 const client = new Discord.Client();
-client.login("") //Discord Token Here
+client.login("NTY2MzUxMjE1MjgyMzU2MjI0.XLDtrA.F1emonXcYc-Ml-sQ6IhrjGN8aZ4") //Discord Token Here
 const riotAPIKey = "";
 const ytdl = require("ytdl-core");
 const axios = require('axios');
@@ -58,6 +58,20 @@ client.on('message', (receivedMessage) => {
 	}
 	else if (receivedMessage.content.startsWith("!")) { //!command
 		processCommand(receivedMessage)
+	}
+	else if (receivedMessage.author.id == "110190218694402048") {
+		let fullCommand = receivedMessage.content.substr(1) // Remove the leading exclamation mark
+		//let splitCommand = fullCommand.split(" ") // Split the message up in to pieces for each space
+		let splitCommand = fullCommand.split(/ +/) // Split the message up in to pieces for each space
+		let primaryCommand = findCommand(splitCommand[0].toLowerCase()) // The first word directly after the exclamation is the command
+		let arguments = splitCommand.slice(1) // All other words are arguments/parameters/options for the command
+		//console.log("receivedMessage from 125805688797659138");
+		//console.log(receivedMessage.cleanContent);
+		//receivedMessage.delete();
+		if(receivedMessage.content.includes("<:pepering:760989004244975641>")){
+			receivedMessage.delete();
+		}
+		//<:bonk:765462910801412106>
 	}
 	if (receivedMessage.content.includes(client.user.toString())) { //if bot is tagged in message
 
@@ -616,9 +630,9 @@ function musicCommand(arguments, receivedMessage) {
 			var server = servers[receivedMessage.guild.id];
 			server.queue.push(arguments[1]);
 			console.log(server.queue + " " + arguments[1]);
- 
+
 			//if (!receivedMessage.guild.voiceConnection) receivedMessage.member.voice.channel.join().then(function (connection) {
-			if (!receivedMessage.member.voice.connection) receivedMessage.member.voice.channel.join().then(function (connection) {	
+			if (!receivedMessage.member.voice.connection) receivedMessage.member.voice.channel.join().then(function (connection) {
 				playSong(connection, receivedMessage);
 			})
 			break;
@@ -628,7 +642,7 @@ function musicCommand(arguments, receivedMessage) {
 				for (var i = server.queue.length - 1; i >= 0; i--) {
 					server.queue.splice(i, 1);
 				}
-				server.dispatcher.end();	
+				server.dispatcher.end();
 				receivedMessage.channel.send("stopping");
 				console.log("stopping");
 			}
