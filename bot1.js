@@ -14,6 +14,7 @@ const Datastore = require('nedb');
 
 //var lastSentMsg;
 var servers = {};
+var bannedWords = ["<:pepering:760989004244975641>", "💍"];
 //List of Commands Avalible
 const helpCommands = ["help"];
 const opggCommands = ["opgg", "op.gg"];
@@ -33,6 +34,7 @@ const rollCommands = ["roll"]
 const musicCommands = ["music", "m"]
 const playCommands = ["play"]
 const emptyCommands = [""];
+
 
 const allCommands = [helpCommands, opggCommands, allOpggCommands, championCommands, memeifyCommands, caesarRodneyCommands, pencaderCommands,
 	pogPlantImageCommands, magic8BallCommands, dogCommands, catCommands, registerCommands, pCommands, coinflipCommands, rollCommands, musicCommands, playCommands, emptyCommands];
@@ -59,24 +61,34 @@ client.on('message', (receivedMessage) => {
 	else if (receivedMessage.content.startsWith("!")) { //!command
 		processCommand(receivedMessage)
 	}
-	else if (receivedMessage.author.id == "110190218694402048") {
-		let fullCommand = receivedMessage.content.substr(1) // Remove the leading exclamation mark
-		//let splitCommand = fullCommand.split(" ") // Split the message up in to pieces for each space
-		let splitCommand = fullCommand.split(/ +/) // Split the message up in to pieces for each space
-		let primaryCommand = findCommand(splitCommand[0].toLowerCase()) // The first word directly after the exclamation is the command
-		let arguments = splitCommand.slice(1) // All other words are arguments/parameters/options for the command
-		//console.log("receivedMessage from 125805688797659138");
-		//console.log(receivedMessage.cleanContent);
-		//receivedMessage.delete();
-		if(receivedMessage.content.includes("<:pepering:760989004244975641>")){
+	else if (receivedMessage.author.id == "110190218694402048") { //dan's id
+		if(checkBannedWordsArray(receivedMessage.content, bannedWords)){
 			receivedMessage.delete();
 		}
-		//<:bonk:765462910801412106>
+	}
+	else if (receivedMessage.author.id == "") {
+		console.log("received message from 125805688797659138");
+		if(checkBannedWordsArray(receivedMessage.content, bannedWords)){
+			receivedMessage.delete();
+		}
+		else if(receivedMessage.content.includes("💍")){
+			console.log("received ring");
+		}
 	}
 	if (receivedMessage.content.includes(client.user.toString())) { //if bot is tagged in message
 
 	}
 })
+
+function checkBannedWordsArray(message, bannedWords){
+	var emoji;
+	for (emoji of bannedWords){
+		if (message.includes(emoji)){
+			return true;
+		}
+	}
+	return false;
+}
 
 function listAllConnectedServersAndChannels() {
 	console.log("Servers:")
