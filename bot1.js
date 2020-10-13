@@ -521,7 +521,7 @@ async function dogCommand(arguments, receivedMessage) {
 	}
 	else if (arguments[0] == 'yj' || arguments[0] == 'kalbean' || arguments[0] == 'yunjin') {
 		try {
-			receivedMessage.channel.send(new Discord.Attachment('images/heads.png'))
+			receivedMessage.channel.send(new Discord.MessageAttachment('images/heads.png'))
 		}
 		catch (e) {
 			console.log(e)
@@ -584,11 +584,11 @@ async function catCommand(arguments, receivedMessage) {
 function coinflipCommand(arguments, receivedMessage) {
 	const m8ballCommand = Math.floor(Math.random() * 2);
 	if (m8ballCommand == 1) {
-		receivedMessage.channel.send(new Discord.Attachment('images/heads.png'))
+		receivedMessage.channel.send(new Discord.MessageAttachment('images/heads.png'))
 		console.log(" --flipped heads")
 	}
 	else {
-		receivedMessage.channel.send(new Discord.Attachment('images/tails.png'))
+		receivedMessage.channel.send(new Discord.MessageAttachment('images/tails.png'))
 		console.log(" --flipped tails")
 	}
 
