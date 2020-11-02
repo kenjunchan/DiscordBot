@@ -6,7 +6,7 @@
 
 const Discord = require('discord.js')
 const client = new Discord.Client();
-client.login("NzU4Mzg2NzU5OTEzOTYzNTIw.X2uMtQ.sWoWxQC8BsU_WJkVvZxWI87_0Os") //Discord Token Here
+client.login("") //Discord Token Here
 const riotAPIKey = "";
 const ytdl = require("ytdl-core");
 const axios = require('axios');
@@ -131,9 +131,13 @@ function isInDB(arguments, receivedMessage) {
 }
 
 async function testCommand(arguments, receivedMessage) {
+	/*
 	let s1 = await getSummonerFromName(arguments[0]);
 	let m1 = await getMatchListFromSummoner(s1);
 	getWinrateFromMatchlist(m1, s1);
+	*/
+	let re = new RegExp('/^[a-z0-9]+$/i')
+	//console.log(re.test("-"))
 	//receivedMessage.channel.send(summoner.id + " " + summoner.accountId);
 }
 //*****************************************************************************************************************************
@@ -310,13 +314,12 @@ function processCommand(receivedMessage) {
 	let primaryCommand = findCommand(splitCommand[0].toLowerCase()) // The first word directly after the exclamation is the command
 	let arguments = splitCommand.slice(1) // All other words are arguments/parameters/options for the command
 	//console.log(arguments)
-	let re = new RegExp('/^[a-z0-9]+$/i')
-
-	if (fullCommand == null || fullCommand.startsWith("!", 0) || !re.test(fullCommand)) {
+	let re = new RegExp("^[a-zA-Z0-9]*$")
+	if (fullCommand == null || fullCommand.startsWith("!", 0) || !re.test(primaryCommand)) {
 		return;
 	}
 	if (splitCommand[0].toLowerCase() == "test") {
-		//testCommand(arguments, receivedMessage)
+		testCommand(arguments, receivedMessage)
 	}
 	else {
 		console.log("Command Received from User: " + receivedMessage.author.id + " \n --Command: " + primaryCommand + " with Arguments: " + arguments)
