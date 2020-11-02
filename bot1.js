@@ -61,7 +61,8 @@ client.on('message', (receivedMessage) => {
 	else if (receivedMessage.content.startsWith("!")) { //!command
 		processCommand(receivedMessage)
 	}
-	else if (receivedMessage.author.id == "110190218694402048") { //dan's id
+	else if (receivedMessage.author.id == "") { //dan's id
+		//110190218694402048 dan's id
 		if(checkBannedWordsArray(receivedMessage.content, bannedWords)){
 			receivedMessage.delete();
 		}
