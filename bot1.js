@@ -423,27 +423,24 @@ function helpCommand(arguments, receivedMessage) {
 }
 
 function opggCommand(arguments, receivedMessage) {
+	/*
 	if (arguments.length > 1) {
 		var msg = "https://na.op.gg/multi/query=";
 		arguments.forEach((value) => {
-			if (value == "brad") {
-				msg = msg + "braddddddd" + "%2C"
-			}
-			else {
-				msg = msg + value + "%2C"
-			}
+			msg = msg + value + "%2C"
 		})
 		msg = msg.substring(0, msg.length - 3)
 		receivedMessage.channel.send(msg)
 	}
 	else {
-		if (arguments[0] == "brad") {
-			receivedMessage.channel.send("https://na.op.gg/summoner/userName=braddddddd")
-		}
-		else {
-			receivedMessage.channel.send("https://na.op.gg/summoner/userName=" + arguments[0])
-		}
+		receivedMessage.channel.send("https://na.op.gg/summoner/userName=" + arguments[0])
 	}
+	*/
+	var summonerName = "";
+	arguments.forEach((value) => {
+		summonerName += value + "+"
+	})
+	receivedMessage.channel.send("https://na.op.gg/summoner/userName=" + summonerName.substring(0,summonerName.length - 1))
 }
 
 function allOpggCommand(arguments, receivedMessage) {
