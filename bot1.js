@@ -11,6 +11,7 @@ const riotAPIKey = "";
 const ytdl = require("ytdl-core");
 const axios = require('axios');
 const Datastore = require('nedb');
+var schedule = require('node-schedule');
 
 //var lastSentMsg;
 var servers = {};
@@ -52,6 +53,10 @@ client.on('ready', () => {
 	console.log("DiscordBot Started")
 	console.log("Setting Automatic Database Compaction to " + dbCompactInterval + " ms")
 	database.persistence.setAutocompactionInterval(dbCompactInterval)
+	var j = schedule.scheduleJob('0 0 20 * * *', function () {
+		console.log('Reminding Bobby to remind Mike to take meds');
+		client.channels.cache.get("695729119324799068").send("<@117775966213898242> remind mike to take meds!")
+	});
 })
 
 client.on('message', (receivedMessage) => {
@@ -63,16 +68,16 @@ client.on('message', (receivedMessage) => {
 	}
 	else if (receivedMessage.author.id == "") { //dan's id
 		//110190218694402048 dan's id
-		if(checkBannedWordsArray(receivedMessage.content, bannedWords)){
+		if (checkBannedWordsArray(receivedMessage.content, bannedWords)) {
 			receivedMessage.delete();
 		}
 	}
 	else if (receivedMessage.author.id == "") {
 		console.log("received message from 125805688797659138");
-		if(checkBannedWordsArray(receivedMessage.content, bannedWords)){
+		if (checkBannedWordsArray(receivedMessage.content, bannedWords)) {
 			receivedMessage.delete();
 		}
-		else if(receivedMessage.content.includes("💍")){
+		else if (receivedMessage.content.includes("💍")) {
 			console.log("received ring");
 		}
 	}
@@ -81,10 +86,10 @@ client.on('message', (receivedMessage) => {
 	}
 })
 
-function checkBannedWordsArray(message, bannedWords){
+function checkBannedWordsArray(message, bannedWords) {
 	var emoji;
-	for (emoji of bannedWords){
-		if (message.includes(emoji)){
+	for (emoji of bannedWords) {
+		if (message.includes(emoji)) {
 			return true;
 		}
 	}
@@ -99,7 +104,7 @@ function listAllConnectedServersAndChannels() {
 			console.log(` -- ${channel.name} (${channel.type}) - ${channel.id}`)
 		})
 	})
-	
+
 }
 
 function getUserFromMention(mention) {
@@ -439,7 +444,7 @@ function opggCommand(arguments, receivedMessage) {
 	arguments.forEach((value) => {
 		summonerName += value + "+"
 	})
-	receivedMessage.channel.send("https://na.op.gg/summoner/userName=" + summonerName.substring(0,summonerName.length - 1))
+	receivedMessage.channel.send("https://na.op.gg/summoner/userName=" + summonerName.substring(0, summonerName.length - 1))
 }
 
 function allOpggCommand(arguments, receivedMessage) {
