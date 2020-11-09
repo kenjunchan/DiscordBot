@@ -6,7 +6,7 @@
 
 const Discord = require('discord.js')
 const client = new Discord.Client();
-client.login("") //Discord Token Here
+client.login("NzU4Mzg2NzU5OTEzOTYzNTIw.X2uMtQ.Bw2KvPb1hipP3bZIUr3HzPN1vOA") //Discord Token Here
 const riotAPIKey = "";
 const ytdl = require("ytdl-core");
 const axios = require('axios');
@@ -93,14 +93,13 @@ function checkBannedWordsArray(message, bannedWords){
 
 function listAllConnectedServersAndChannels() {
 	console.log("Servers:")
-	/*
-	client.guilds.forEach((guild) => {
+	client.guilds.cache.forEach((guild) => {
 		console.log(" - " + guild.name)
-		guild.channels.forEach((channel) => {
+		guild.channels.cache.forEach((channel) => {
 			console.log(` -- ${channel.name} (${channel.type}) - ${channel.id}`)
 		})
 	})
-	*/
+	
 }
 
 function getUserFromMention(mention) {
