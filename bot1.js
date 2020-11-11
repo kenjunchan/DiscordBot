@@ -149,15 +149,16 @@ function isInDB(arguments, receivedMessage) {
 	return true;
 }
 
-async function testCommand(arguments, receivedMessage) {
+function testCommand(arguments, receivedMessage) {
 	/*
 	let s1 = await getSummonerFromName(arguments[0]);
 	let m1 = await getMatchListFromSummoner(s1);
 	getWinrateFromMatchlist(m1, s1);
 	*/
-	let re = new RegExp('/^[a-z0-9]+$/i')
+	//let re = new RegExp('/^[a-z0-9]+$/i')
 	//console.log(re.test("-"))
 	//receivedMessage.channel.send(summoner.id + " " + summoner.accountId);
+	console.log(checkIfStringIsValidInt(arguments[0]))
 }
 //*****************************************************************************************************************************
 //RIOT API STUFF
@@ -249,7 +250,14 @@ function pogCoinCommand(arguments, receivedMessage) {
 
 function givePogcoins(arguments, receivedMessage) {
 	try {
-		let amount = parseInt(arguments[1]);
+		let amount = arguments[1];
+		if (checkIfStringIsValidInt(amount)){
+			console.log("valid amount: " + amount)
+		}
+		else{
+			receivedMessage.channel.send("not a valid number to give!\n!p give <amount> <@username>")
+			return;
+		}
 		let userID1 = receivedMessage.author.id;
 		let userID2 = receivedMessage.mentions.users.first().id.toString();
 		giveUserPogcoins(userID1, userID2, amount, receivedMessage);
@@ -373,6 +381,14 @@ function gamblePogCoinsSlot(arguments, receivedMessage) {
 function gpcSlots(pogcoinsAmt, arguments, receivedMessage){
 	let randRoll = Math.floor(Math.random() * Math.floor(100)) + 1;
 	let rollAmount = arguments[1]
+	console.log(parseInt(rollAmount, 10))
+	if (checkIfStringIsValidInt(rollAmount)){
+		console.log("valid amount: " + rollAmount)
+	}
+	else{
+		receivedMessage.channel.send("not a valid number to gamble!\n!p gamble <amount>")
+		return;
+	}
 	let authID = receivedMessage.author.id
 	if (rollAmount < 10){
 		receivedMessage.channel.send("minimum amount to roll is 10")
@@ -389,20 +405,20 @@ function gpcSlots(pogcoinsAmt, arguments, receivedMessage){
 	if (randRoll == 1 || randRoll == 2){
 		changePogCoin(authID, (5 * rollAmount))
 		receivedMessage.channel.send(new Discord.MessageAttachment('images/pepering.png'))
-		receivedMessage.channel.send("(5x) HOLY MOTHER OF POG!!! You won " + rollAmount + " pogcoins!")
+		receivedMessage.channel.send("(5x) HOLY MOTHER OF POG!!! You won " + 5 * rollAmount + " pogcoins!")
 	}
 	else if (randRoll >= 3 && randRoll <= 5){
 		changePogCoin(authID, (3 * rollAmount))
 		receivedMessage.channel.send(new Discord.MessageAttachment('images/pepepoggers.png'))
-		receivedMessage.channel.send("(3x) WOW POG! You won " + rollAmount + " pogcoins!")
+		receivedMessage.channel.send("(3x) WOW POG! You won " + 3 * rollAmount + " pogcoins!")
 	}
 	else if (randRoll >= 6 && randRoll <= 15){
 		changePogCoin(authID, (2 * rollAmount))
 		receivedMessage.channel.send(new Discord.MessageAttachment('images/pepestonks.png'))
-		receivedMessage.channel.send("(2x) DOUBLE DOUBLE!! You won " + rollAmount + " pogcoins!")
+		receivedMessage.channel.send("(2x) DOUBLE DOUBLE!! You won " + 2 * rollAmount + " pogcoins!")
 	}
 	else if (randRoll >= 16 && randRoll <= 35){
-		changePogCoin(authID, rollAmount)
+		changePogCoin(authID, (1 * rollAmount))
 		receivedMessage.channel.send(new Discord.MessageAttachment('images/pepeignore.png'))
 		receivedMessage.channel.send("(1x) You lost nothing!")
 	}
@@ -418,6 +434,21 @@ function gpcSlots(pogcoinsAmt, arguments, receivedMessage){
 	}
 }
 
+
+function checkIfStringIsValidInt(input){
+	if (isNaN(input)){
+		return false
+	}
+	else{
+		if(Number(input) === parseInt(input, 10)){
+			return true
+		}
+		else{
+			return false
+		}
+	}
+}
+
 //*****************************************************************************************************************************
 function processCommand(receivedMessage) {
 	let fullCommand = receivedMessage.content.substr(1) // Remove the leading exclamation mark
@@ -427,11 +458,13 @@ function processCommand(receivedMessage) {
 	let arguments = splitCommand.slice(1) // All other words are arguments/parameters/options for the command
 	//console.log(arguments)
 	let re = new RegExp("^[a-zA-Z0-9]*$")
+	//console.log(splitCommand[0].toLowerCase())
+	if (splitCommand[0].toLowerCase() == "test") {
+		console.log("running test command")
+		testCommand(arguments, receivedMessage)
+	}
 	if (fullCommand == null || fullCommand.startsWith("!", 0) || !re.test(primaryCommand)) {
 		return;
-	}
-	if (splitCommand[0].toLowerCase() == "test") {
-		testCommand(arguments, receivedMessage)
 	}
 	else {
 		console.log("Command Received from User: " + receivedMessage.author.id + " \n --Command: " + primaryCommand + " with Arguments: " + arguments)
