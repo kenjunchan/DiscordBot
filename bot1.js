@@ -57,6 +57,20 @@ client.on('ready', () => {
 		console.log('Reminding Bobby to remind Mike to take meds');
 		client.channels.cache.get("695729119324799068").send("<@117775966213898242> remind mike to take meds!")
 	});
+	var remindKen = schedule.scheduleJob('0 0 19 * * *', function () {
+		console.log('Reminding Bobby to remind Mike to take meds');
+		client.channels.cache.get("758387764751499294").send("<@125805688797659138> remind mike to take meds!")
+	});
+	var cjPogCoins = schedule.scheduleJob('0 * * * *', function () {
+		let pogcoinStimulus = 100;
+		try {
+			database.update({}, { $inc: { pogcoins: pogcoinStimulus } }, { multi: true }, function (err, numReplaced) { console.log("Giving everyone " + pogcoinStimulus + " pogcoins") });
+		}
+		catch (err) {
+			console.log("something went wrong with trying to give everyone pogcoins")
+		}
+	});
+
 })
 
 client.on('message', (receivedMessage) => {
@@ -126,7 +140,7 @@ function isInDB(arguments, receivedMessage) {
 	database.findOne({ discordID: receivedMessage.author.id }, (err, data) => {
 		if (data == null) {
 			console.log('--can not find user: ' + receivedMessage.author.id + ', adding new entry')
-			database.insert({ discordID: receivedMessage.author.id, pogcoins: 0 });
+			database.insert({ discordID: receivedMessage.author.id, pogcoins: 300 });
 		}
 		else {
 			console.log('--found User: ' + data.discordID);
@@ -217,11 +231,16 @@ function pogCoinCommand(arguments, receivedMessage) {
 		case "check":
 			checkCoins(arguments, receivedMessage)
 			break;
+		/*
 		case "add1":
 			addOnePogCoin(arguments, receivedMessage)
 			break;
+		*/
 		case "give":
 			givePogcoins(arguments, receivedMessage)
+			break;
+		case "gamble":
+			gamblePogCoinsSlot(arguments, receivedMessage)
 			break;
 		case "":
 			break;
@@ -229,14 +248,19 @@ function pogCoinCommand(arguments, receivedMessage) {
 }
 
 function givePogcoins(arguments, receivedMessage) {
-	let amount = parseInt(arguments[1]);
-	let userID1 = receivedMessage.author.id;
-	let userID2 = receivedMessage.mentions.users.first().id.toString();
-	giveUserPogcoins(userID1, userID2, amount, receivedMessage);
+	try {
+		let amount = parseInt(arguments[1]);
+		let userID1 = receivedMessage.author.id;
+		let userID2 = receivedMessage.mentions.users.first().id.toString();
+		giveUserPogcoins(userID1, userID2, amount, receivedMessage);
+	}
+	catch (err) {
+		receivedMessage.channel.send("Something went wrong!\n!p give <amount> <@username>")
+	}
 }
 
 function giveUserPogcoins(user1, user2, amount, receivedMessage) {
-
+	let isRecipientInDatabase = true;
 	if (amount <= 0) {
 		receivedMessage.channel.send("Invalid Amount");
 		return;
@@ -245,13 +269,19 @@ function giveUserPogcoins(user1, user2, amount, receivedMessage) {
 		receivedMessage.channel.send("cant give to yourself");
 		return;
 	}
+	database.findOne({ discordID: user2 }, function (err, data) {
+		if (data == null) {
+			receivedMessage.channel.send("Recipient not found in database, have them type !register")
+			isRecipientInDatabase = false;
+		}
+	});
 	database.findOne({ discordID: user1 }, function (err, data) {
 		if (data != null) {
 			if (amount > data.pogcoins) {
 				receivedMessage.channel.send("Insufficient pogcoins to give");
 				return;
 			}
-			else {
+			else if (isRecipientInDatabase){
 				console.log("User: " + user1 + " giving User: " + user2 + " " + amount + " pogcoins");
 				changePogCoin(user2, amount);
 				changePogCoin(user1, -amount);
@@ -267,7 +297,7 @@ function changePogCoin(authorID, amount) {
 			database.update({ discordID: authorID }, { $inc: { pogcoins: amount } }, { multi: true }, function (err, numReplaced) { console.log("Changed User: " + authorID + " pogcoins by " + amount) });
 		}
 		else {
-			receivedMessage.channel.send("Could not find user, Try typing !register");
+			//receivedMessage.channel.send("Could not find user, Try typing !register");
 		}
 	})
 }
@@ -280,35 +310,112 @@ function addOnePogCoin(arguments, receivedMessage) {
 	else {
 		var aID = receivedMessage.author.id;
 	}
-	changePogCoin(aID, parseInt(arguments[1]))
+	changePogCoin(aID, 10)
 }
 
 
 
 function checkCoins(arguments, receivedMessage) {
-	if (arguments.length > 1) {
-		checkUserCoins(receivedMessage.mentions.users.first(), receivedMessage);
-		return;
+	try {
+		if (arguments.length > 1) {
+			checkUserCoins(receivedMessage.mentions.users.first(), receivedMessage);
+			return;
+		}
+		database.findOne({ discordID: receivedMessage.author.id }, (err, data) => {
+			if (data != null) {
+				receivedMessage.channel.send("You have: " + data.pogcoins + " pogcoins!")
+			}
+			else {
+				receivedMessage.channel.send("User not found, try typing !register");
+			}
+		})
 	}
-	database.findOne({ discordID: receivedMessage.author.id }, (err, data) => {
-		if (data != null) {
-			receivedMessage.channel.send("You have: " + data.pogcoins + " pogcoins!")
-		}
-		else {
-			receivedMessage.channel.send("User not found, try typing !register");
-		}
-	})
+	catch (err) {
+		receivedMessage.channel.send("Something went wrong!\n!p check or !p check <@username>")
+	}
 }
 
 function checkUserCoins(author, receivedMessage) {
-	database.findOne({ discordID: author.id.toString() }, (err, data) => {
-		if (data != null) {
-			receivedMessage.channel.send("User: " + author.username + " has " + data.pogcoins + " pogcoins!")
-		}
-		else {
-			receivedMessage.channel.send("User " + author.username + " not found ");
-		}
-	})
+	try {
+		database.findOne({ discordID: author.id.toString() }, (err, data) => {
+			if (data != null) {
+				receivedMessage.channel.send("User: " + author.username + " has " + data.pogcoins + " pogcoins!")
+				return data.pogcoins
+			}
+			else {
+				receivedMessage.channel.send("User " + author.username + " not found, try typing !register");
+			}
+		})
+	}
+	catch (err) {
+		receivedMessage.channel.send("Something went wrong")
+	}
+}
+
+function gamblePogCoinsSlot(arguments, receivedMessage) {
+	try {
+		database.findOne({ discordID: receivedMessage.author.id }, (err, data) => {
+			if (data != null) {
+				let authorID = receivedMessage.author.id;
+				let pogcoinsAmount = data.pogcoins;			
+				gpcSlots(pogcoinsAmount, arguments, receivedMessage);
+			}
+			else {
+				receivedMessage.channel.send("User " + receivedMessage.author.username + " not found, try typing !register");
+			}
+		})
+	}
+	catch (err) {
+		receivedMessage.channel.send("Something went wrong!\n!p gamble <amount>")
+	}
+}
+
+function gpcSlots(pogcoinsAmt, arguments, receivedMessage){
+	let randRoll = Math.floor(Math.random() * Math.floor(100)) + 1;
+	let rollAmount = arguments[1]
+	let authID = receivedMessage.author.id
+	if (rollAmount < 10){
+		receivedMessage.channel.send("minimum amount to roll is 10")
+		console.log("minimum to roll is 10")
+		return;
+	}
+	if (rollAmount > pogcoinsAmt){
+		receivedMessage.channel.send("Insufficient pogcoins to gamble")
+		console.log("insufficient pogcoins to roll")
+		return;
+	}
+	console.log(authID + " rolled: " + randRoll + " gambled: " + rollAmount + " pog coins!");
+	changePogCoin(authID, -rollAmount);
+	if (randRoll == 1 || randRoll == 2){
+		changePogCoin(authID, (5 * rollAmount))
+		receivedMessage.channel.send(new Discord.MessageAttachment('images/pepering.png'))
+		receivedMessage.channel.send("(5x) HOLY MOTHER OF POG!!! You won " + rollAmount + " pogcoins!")
+	}
+	else if (randRoll >= 3 && randRoll <= 5){
+		changePogCoin(authID, (3 * rollAmount))
+		receivedMessage.channel.send(new Discord.MessageAttachment('images/pepepoggers.png'))
+		receivedMessage.channel.send("(3x) WOW POG! You won " + rollAmount + " pogcoins!")
+	}
+	else if (randRoll >= 6 && randRoll <= 15){
+		changePogCoin(authID, (2 * rollAmount))
+		receivedMessage.channel.send(new Discord.MessageAttachment('images/pepestonks.png'))
+		receivedMessage.channel.send("(2x) DOUBLE DOUBLE!! You won " + rollAmount + " pogcoins!")
+	}
+	else if (randRoll >= 16 && randRoll <= 35){
+		changePogCoin(authID, rollAmount)
+		receivedMessage.channel.send(new Discord.MessageAttachment('images/pepeignore.png'))
+		receivedMessage.channel.send("(1x) You lost nothing!")
+	}
+	else if (randRoll >= 36 && randRoll <= 64){
+		let halfamount = Math.round(.5 * rollAmount)
+		changePogCoin(authID, halfamount)
+		receivedMessage.channel.send(new Discord.MessageAttachment('images/pepesadge.png'))
+		receivedMessage.channel.send("(.5x) You got " + halfamount + " pogcoins back")
+	}
+	else{
+		receivedMessage.channel.send(new Discord.MessageAttachment('images/pepekms.png'))
+		receivedMessage.channel.send("(0x) You got nothing and lost " + rollAmount + " pogcoins")
+	}
 }
 
 //*****************************************************************************************************************************
