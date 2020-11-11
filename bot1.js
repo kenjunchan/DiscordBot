@@ -258,6 +258,7 @@ function givePogcoins(arguments, receivedMessage) {
 			receivedMessage.channel.send("not a valid number to give!\n!p give <amount> <@username>")
 			return;
 		}
+		amount = parseInt(arguments[1])
 		let userID1 = receivedMessage.author.id;
 		let userID2 = receivedMessage.mentions.users.first().id.toString();
 		giveUserPogcoins(userID1, userID2, amount, receivedMessage);
