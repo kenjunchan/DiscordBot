@@ -63,7 +63,7 @@ client.on('ready', () => {
 		client.channels.cache.get("758387764751499294").send("<@125805688797659138> remind mike to take meds!")
 	});
 	var cjPogCoins = schedule.scheduleJob('0,30 * * * *', function () {
-		let pogcoinStimulus = 150;
+		let pogcoinStimulus = 100;
 		try {
 			database.update({}, { $inc: { pogcoins: pogcoinStimulus } }, { multi: true }, function (err, numReplaced) { console.log("Giving everyone " + pogcoinStimulus + " pogcoins") });
 		}
@@ -273,7 +273,7 @@ function pogcoinHelp(arguments, receivedMessage){
 	helpmsg += "\n!p check or !p check <@username> - checks how many pogcoins you or specified person has"
 	helpmsg += "\n!p gamble <amount> - gamble your pogcoins away! rates are not favorable"
 	helpmsg += "\n!p give <amount> <@username> - give your pogcoins to the specified person"
-	helpmsg += "\n!p leaderboard - displays pogcoin leaderboard```"
+	helpmsg += "\n!p leaderboard <number or all>- displays pogcoin leaderboard```"
 	receivedMessage.author.send(helpmsg)
 }
 
@@ -428,12 +428,29 @@ function checkUserCoins(author, receivedMessage) {
 
 function checkCoinLeaderboard(arguments, receivedMessage) {
 	try {
+		if (arguments[1] == "all"){
+			limit = Number.MAX_SAFE_INTEGER
+		}
+		else if (arguments[1] == null){
+			limit = 10;
+		}
+		else if (!checkIfStringIsValidInt(arguments[1])){
+			receivedMessage.channel.send("not a valid number!\n\!p leaderboard <number>")
+		}
+		else {
+			limit = parseInt(arguments[1])
+		}
+		
+		
 		database.find({}).sort({ pogcoins: -1 }).exec(function (err, data) {
 			if (data != null) {
+				let amt = 0;
 				fields = [["Name", "Pogcoins"]];
-
 				data.forEach(function (item) {
-					fields.push([item.username, item.pogcoins]);
+					if(item.username != null && amt < limit) {
+						fields.push([item.username, item.pogcoins]);
+						amt++;
+					}
 				});
 				receivedMessage.channel.send("```\n" + table.table(fields) + "```\n");
 				//receivedMessage.channel.send("Don't see your username? Update it with !register");
@@ -513,20 +530,20 @@ function gpcSlots(pogcoinsAmt, arguments, receivedMessage) {
 		emsg = "(2x) DOUBLE DOUBLE!! You won " + winamount + " pogcoins!";
 
 	}
-	else if (randRoll >= 16 && randRoll <= 30) {
+	else if (randRoll >= 16 && randRoll <= 27) {
 		let halfamount = Math.round(.3 * rollAmount)
 		winamount = 1*rollAmount + 1*halfamount
 		changePogCoinBet(authID, 1*winamount)
 		imgurl =  "https://i.imgur.com/SLffH3s.png" //pepecheer
 		emsg = "(1.3x) NOT BAD! You won " + winamount + " pogcoins!";
 	}
-	else if (randRoll >= 31 && randRoll <= 49) {
+	else if (randRoll >= 28 && randRoll <= 47) {
 		winamount = 1 * rollAmount;
 		changePogCoinBet(authID, winamount)
 		imgurl = "https://i.imgur.com/D5Q8pG1.png" //pepeignore
 		emsg = "(1x) You lost nothing!"
 	}
-	else if (randRoll >= 50 && randRoll <= 72) {
+	else if (randRoll >= 48 && randRoll <= 70) {
 		let halfamount = Math.round(.5 * rollAmount)
 		changePogCoinBet(authID, halfamount)
 		winamount = halfamount;
