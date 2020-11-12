@@ -436,6 +436,7 @@ function checkCoinLeaderboard(arguments, receivedMessage) {
 		}
 		else if (!checkIfStringIsValidInt(arguments[1])){
 			receivedMessage.channel.send("not a valid number!\n\!p leaderboard <number>")
+			return;
 		}
 		else {
 			limit = parseInt(arguments[1])
