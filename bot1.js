@@ -383,10 +383,10 @@ function checkCoinLeaderboard(arguments, receivedMessage) {
 	try {
 		database.find({}).sort({ pogcoins: -1 }).exec(function (err, data) {
 			if (data != null) {
-				fields = [["Name", "Pogcoins", "Gambled", "Won", "Net"]];
+				fields = [["Name", "Pogcoins"]];
 				
 				data.forEach(function(item){
-					fields.push([item.username, item.pogcoins, item.spent, item.earned, item.earned - item.spent]);
+					fields.push([item.username, item.pogcoins]);
 				});
 				receivedMessage.channel.send("```\n" + table.table(fields) + "```\n");
 				receivedMessage.channel.send("Don't see your username? Update it with !register");
