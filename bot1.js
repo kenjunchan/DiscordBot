@@ -273,9 +273,9 @@ function givePogcoins(arguments, receivedMessage) {
 			return;
 		}
 		amount = parseInt(arguments[1])
-		let userID1 = receivedMessage.author.id;
-		let userID2 = receivedMessage.mentions.users.first().id.toString();
-		giveUserPogcoins(userID1, userID2, amount, receivedMessage);
+		let user1 = receivedMessage.author;
+		let user2 = receivedMessage.mentions.users.first();
+		giveUserPogcoins(user1, user2, amount, receivedMessage);
 	}
 	catch (err) {
 		receivedMessage.channel.send("Something went wrong!\n!p give <amount> <@username>")
@@ -288,27 +288,27 @@ function giveUserPogcoins(user1, user2, amount, receivedMessage) {
 		receivedMessage.channel.send("Invalid Amount");
 		return;
 	}
-	if (user1 == user2) {
+	if (user1.id == user2.id) {
 		receivedMessage.channel.send("cant give to yourself");
 		return;
 	}
-	database.findOne({ discordID: user2 }, function (err, data) {
+	database.findOne({ discordID: user2.id }, function (err, data) {
 		if (data == null) {
 			receivedMessage.channel.send("Recipient not found in database, have them type !register")
 			isRecipientInDatabase = false;
 		}
 	});
-	database.findOne({ discordID: user1 }, function (err, data) {
+	database.findOne({ discordID: user1.id }, function (err, data) {
 		if (data != null) {
 			if (amount > data.pogcoins) {
 				receivedMessage.channel.send("Insufficient pogcoins to give");
 				return;
 			}
 			else if (isRecipientInDatabase) {
-				console.log("User: " + user1 + " giving User: " + user2 + " " + amount + " pogcoins");
-				changePogCoin(user2, amount);
-				changePogCoin(user1, -amount);
-				receivedMessage.channel.send("-- sent pogcoins!")
+				console.log("User: " + user1.id + " giving User: " + user2.id + " " + amount + " pogcoins");
+				changePogCoin(user2.id, amount);
+				changePogCoin(user1.id, -amount);
+				receivedMessage.channel.send("Giving " + amount + " pogcoins to " + user2.username + "!")
 			}
 		}
 	});
@@ -413,7 +413,7 @@ function checkUserCoins(author, receivedMessage) {
 
 function checkCoinLeaderboard(arguments, receivedMessage) {
 	try {
-		database.find({}).sort({ pogcoins: -1 }).limit(10).exec(function (err, data) {
+		database.find({}).sort({ pogcoins: -1 }).exec(function (err, data) {
 			if (data != null) {
 				fields = [["Name", "Pogcoins"]];
 
