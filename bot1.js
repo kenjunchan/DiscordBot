@@ -43,13 +43,13 @@ const allCommands = [helpCommands, opggCommands, allOpggCommands, championComman
 
 
 //Load Database
-const database = new Datastore('datastore.db');
+const database = new Datastore('pogplantdatastore.db');
 database.loadDatabase();
 
 const dbCompactInterval = 60000; //number in miliseconds
 //*****************************************************************************************************************************
 client.on('ready', () => {
-	client.user.setActivity("dont look at me im ugly")
+	client.user.setActivity("pogcoin tycoon")
 	listAllConnectedServersAndChannels()
 	console.log("DiscordBot Started")
 	console.log("Setting Automatic Database Compaction to " + dbCompactInterval + " ms")
@@ -145,7 +145,7 @@ function isInDB(arguments, receivedMessage) {
 		}
 		else {
 			console.log('--found User: ' + data.discordID);
-			database.update({ discordID: data.discordID }, { $set: { username: receivedMessage.author.username} }, function (err, data) { console.log("Updated username for: " + receivedMessage.author.id) });
+			database.update({ discordID: data.discordID }, { $set: { username: receivedMessage.author.username } }, function (err, data) { console.log("Updated username for: " + receivedMessage.author.id) });
 		}
 	})
 	return true;
@@ -160,7 +160,16 @@ function testCommand(arguments, receivedMessage) {
 	//let re = new RegExp('/^[a-z0-9]+$/i')
 	//console.log(re.test("-"))
 	//receivedMessage.channel.send(summoner.id + " " + summoner.accountId);
-	console.log(checkIfStringIsValidInt(arguments[0]))
+	//console.log(checkIfStringIsValidInt(arguments[0]))
+	/*
+	receivedMessage.channel.send(new Discord.MessageAttachment('images/pepering.png'))
+	receivedMessage.channel.send(new Discord.MessageAttachment('images/pepepoggers.png'))
+	receivedMessage.channel.send(new Discord.MessageAttachment('images/pepestonks.png'))
+	receivedMessage.channel.send(new Discord.MessageAttachment('images/pepeignore.png'))
+	receivedMessage.channel.send(new Discord.MessageAttachment('images/pepesadge.png'))
+	receivedMessage.channel.send(new Discord.MessageAttachment('images/pepekms.png'))
+	*/
+	console.log(getPogCoinsFromDiscordID("125805688797659138"))
 }
 //*****************************************************************************************************************************
 //RIOT API STUFF
@@ -256,10 +265,10 @@ function pogCoinCommand(arguments, receivedMessage) {
 function givePogcoins(arguments, receivedMessage) {
 	try {
 		let amount = arguments[1];
-		if (checkIfStringIsValidInt(amount)){
+		if (checkIfStringIsValidInt(amount)) {
 			console.log("valid amount: " + amount)
 		}
-		else{
+		else {
 			receivedMessage.channel.send("not a valid number to give!\n!p give <amount> <@username>")
 			return;
 		}
@@ -295,7 +304,7 @@ function giveUserPogcoins(user1, user2, amount, receivedMessage) {
 				receivedMessage.channel.send("Insufficient pogcoins to give");
 				return;
 			}
-			else if (isRecipientInDatabase){
+			else if (isRecipientInDatabase) {
 				console.log("User: " + user1 + " giving User: " + user2 + " " + amount + " pogcoins");
 				changePogCoin(user2, amount);
 				changePogCoin(user1, -amount);
@@ -319,7 +328,7 @@ function changePogCoin(authorID, amount) {
 function changePogCoinBet(authorID, amount) {
 	database.findOne({ discordID: authorID }, (err, data) => {
 		if (data != null) {
-			database.update({ discordID: authorID }, { $inc: { pogcoins: amount, spent: (amount < 0) ? Math.abs(amount) : 0, earned: (amount > 0) ? amount : 0} }, { multi: true }, function (err, numReplaced) { 
+			database.update({ discordID: authorID }, { $inc: { pogcoins: amount, spent: (amount < 0) ? Math.abs(amount) : 0, earned: (amount > 0) ? amount : 0 } }, { multi: true }, function (err, numReplaced) {
 				console.log("Changed User: " + authorID + " pogcoins by " + amount)
 			});
 		}
@@ -340,7 +349,30 @@ function addOnePogCoin(arguments, receivedMessage) {
 	changePogCoin(aID, 10)
 }
 
-
+function getPogCoinsFromDiscordID(discordID) {
+	try {
+		let pogcoinbalance = null;
+		database.findOne({ discordID: discordID }, (err, data) => {
+			if (data != null) {
+				//receivedMessage.channel.send("User: " + author.username + " has " + data.pogcoins + " pogcoins!")
+				//return data.pogcoins
+				//console.log(data.pogcoins)
+				let datacopy = JSON.parse(JSON.stringify(data))
+				pogcoinbalance = datacopy.pogcoins
+				return data.pogcoins
+			}
+			else {
+				//receivedMessage.channel.send("User " + author.username + " not found, try typing !register");
+				console.log("DISCORD_ID WAS NOT FOUND IN DATABASE")
+			}
+		})
+		return pogcoinbalance
+	}
+	catch (err) {
+		//receivedMessage.channel.send("Something went wrong")
+		console.log("SOMETHING WENT WRONG WHEN TRYING TO GET POG COIN BALANCE FROM DISCORD ID")
+	}
+}
 
 function checkCoins(arguments, receivedMessage) {
 	try {
@@ -367,7 +399,7 @@ function checkUserCoins(author, receivedMessage) {
 		database.findOne({ discordID: author.id.toString() }, (err, data) => {
 			if (data != null) {
 				receivedMessage.channel.send("User: " + author.username + " has " + data.pogcoins + " pogcoins!")
-				return data.pogcoins
+				//return data.pogcoins
 			}
 			else {
 				receivedMessage.channel.send("User " + author.username + " not found, try typing !register");
@@ -384,8 +416,8 @@ function checkCoinLeaderboard(arguments, receivedMessage) {
 		database.find({}).sort({ pogcoins: -1 }).exec(function (err, data) {
 			if (data != null) {
 				fields = [["Name", "Pogcoins"]];
-				
-				data.forEach(function(item){
+
+				data.forEach(function (item) {
 					fields.push([item.username, item.pogcoins]);
 				});
 				receivedMessage.channel.send("```\n" + table.table(fields) + "```\n");
@@ -406,7 +438,7 @@ function gamblePogCoinsSlot(arguments, receivedMessage) {
 		database.findOne({ discordID: receivedMessage.author.id }, (err, data) => {
 			if (data != null) {
 				let authorID = receivedMessage.author.id;
-				let pogcoinsAmount = data.pogcoins;			
+				let pogcoinsAmount = data.pogcoins;
 				gpcSlots(pogcoinsAmount, arguments, receivedMessage);
 			}
 			else {
@@ -419,72 +451,105 @@ function gamblePogCoinsSlot(arguments, receivedMessage) {
 	}
 }
 
-function gpcSlots(pogcoinsAmt, arguments, receivedMessage){
+function gpcSlots(pogcoinsAmt, arguments, receivedMessage) {
 	let randRoll = Math.floor(Math.random() * Math.floor(100)) + 1;
 	let rollAmount = arguments[1]
-	console.log(parseInt(rollAmount, 10))
-	if (checkIfStringIsValidInt(rollAmount)){
-		console.log("valid amount: " + rollAmount)
+	let imgurl = "https://i.imgur.com/MvUYFja.png";
+	let emsg = "Something went wrong if this was sent";
+	let winamount = 0;
+	//console.log(parseInt(rollAmount, 10))
+	if (checkIfStringIsValidInt(rollAmount)) {
+		//console.log("valid amount: " + rollAmount)
 	}
-	else{
+	else {
 		receivedMessage.channel.send("not a valid number to gamble!\n!p gamble <amount>")
 		return;
 	}
 	let authID = receivedMessage.author.id
-	if (rollAmount < 10){
+	if (rollAmount < 10) {
 		receivedMessage.channel.send("minimum amount to roll is 10")
 		console.log("minimum to roll is 10")
 		return;
 	}
-	if (rollAmount > pogcoinsAmt){
+	if (rollAmount > pogcoinsAmt) {
 		receivedMessage.channel.send("Insufficient pogcoins to gamble")
 		console.log("insufficient pogcoins to roll")
 		return;
 	}
 	console.log(authID + " rolled: " + randRoll + " gambled: " + rollAmount + " pog coins!");
 	changePogCoinBet(authID, -rollAmount);
-	if (randRoll == 1 || randRoll == 2){
-		changePogCoinBet(authID, (5 * rollAmount))
-		receivedMessage.channel.send(new Discord.MessageAttachment('images/pepering.png'))
-		receivedMessage.channel.send("(5x) HOLY MOTHER OF POG!!! You won " + 5 * rollAmount + " pogcoins!")
+	if (randRoll == 1 || randRoll == 2) {
+		winamount = 5 * rollAmount;
+		changePogCoinBet(authID, winamount)
+		//receivedMessage.channel.send(new Discord.MessageAttachment('images/pepering.png'))
+		imgurl = "https://i.imgur.com/lsMhWZA.png" // pepering
+		//receivedMessage.channel.send("(5x) HOLY MOTHER OF POG!!! You won " + 5 * rollAmount + " pogcoins!")
+		emsg = "(5x) HOLY MOTHER OF POG!!! You won " + 5 * rollAmount + " pogcoins!";
+		
 	}
-	else if (randRoll >= 3 && randRoll <= 5){
-		changePogCoinBet(authID, (3 * rollAmount))
-		receivedMessage.channel.send(new Discord.MessageAttachment('images/pepepoggers.png'))
-		receivedMessage.channel.send("(3x) WOW POG! You won " + 3 * rollAmount + " pogcoins!")
+	else if (randRoll >= 3 && randRoll <= 5) {
+		winamount = 3 * rollAmount;
+		changePogCoinBet(authID, winamount)
+		//receivedMessage.channel.send(new Discord.MessageAttachment('images/pepepoggers.png'))
+		//receivedMessage.channel.send("(3x) WOW POG! You won " + 3 * rollAmount + " pogcoins!")
+		imgurl = "https://i.imgur.com/0bNq11b.png" //pepepoggers
+		emsg = "(3x) WOW POG! You won " + 3 * rollAmount + " pogcoins!";
 	}
-	else if (randRoll >= 6 && randRoll <= 15){
-		changePogCoinBet(authID, (2 * rollAmount))
-		receivedMessage.channel.send(new Discord.MessageAttachment('images/pepestonks.png'))
-		receivedMessage.channel.send("(2x) DOUBLE DOUBLE!! You won " + 2 * rollAmount + " pogcoins!")
+	else if (randRoll >= 6 && randRoll <= 15) {
+		winamount = 2 * rollAmount;
+		changePogCoinBet(authID, winamount)
+		//receivedMessage.channel.send(new Discord.MessageAttachment('images/pepestonks.png'))
+		//receivedMessage.channel.send("(2x) DOUBLE DOUBLE!! You won " + 2 * rollAmount + " pogcoins!")
+		imgurl = "https://i.imgur.com/i41RLFv.png" //pepestonks
+		emsg = "(2x) DOUBLE DOUBLE!! You won " + 2 * rollAmount + " pogcoins!";
+
 	}
-	else if (randRoll >= 16 && randRoll <= 35){
-		changePogCoinBet(authID, (1 * rollAmount))
-		receivedMessage.channel.send(new Discord.MessageAttachment('images/pepeignore.png'))
-		receivedMessage.channel.send("(1x) You lost nothing!")
+	else if (randRoll >= 16 && randRoll <= 35) {
+		winamount = 1 * rollAmount;
+		changePogCoinBet(authID, winamount)
+		//receivedMessage.channel.send(new Discord.MessageAttachment('images/pepeignore.png'))
+		//receivedMessage.channel.send("(1x) You lost nothing!")
+		imgurl = "https://i.imgur.com/D5Q8pG1.png" //pepeignore
+		emsg = "(1x) You lost nothing!"
 	}
-	else if (randRoll >= 36 && randRoll <= 64){
+	else if (randRoll >= 36 && randRoll <= 64) {
 		let halfamount = Math.round(.5 * rollAmount)
 		changePogCoinBet(authID, halfamount)
-		receivedMessage.channel.send(new Discord.MessageAttachment('images/pepesadge.png'))
-		receivedMessage.channel.send("(.5x) You got " + halfamount + " pogcoins back")
+		winamount = halfamount;
+		//receivedMessage.channel.send(new Discord.MessageAttachment('images/pepesadge.png'))
+		//receivedMessage.channel.send("(.5x) You got " + halfamount + " pogcoins back")
+		imgurl = "https://i.imgur.com/YEuQ2iY.png" //pepesadge
+		emsg = "(.5x) You got " + halfamount + " pogcoins back"
+
 	}
-	else{
-		receivedMessage.channel.send(new Discord.MessageAttachment('images/pepekms.png'))
-		receivedMessage.channel.send("(0x) You got nothing and lost " + rollAmount + " pogcoins")
+	else {
+		//receivedMessage.channel.send(new Discord.MessageAttachment('images/pepekms.png'))
+		//receivedMessage.channel.send("(0x) You got nothing and lost " + rollAmount + " pogcoins")
+		winamount = 0;
+		imgurl = "https://i.imgur.com/L37ZPeW.png" //pepekms
+		emsg = "(0x) You got nothing and lost " + rollAmount + " pogcoins"
 	}
+
+	const embed = new Discord.MessageEmbed()
+		//.setColor()
+		.setAuthor("pog-sino", "https://i.imgur.com/MvUYFja.png")
+		.setThumbnail(imgurl)
+		.setFooter(receivedMessage.author.username + " now has " + (pogcoinsAmt - rollAmount + winamount) + " pogcoins!")
+		.setDescription("```" + emsg + "```");
+
+	receivedMessage.channel.send({ embed });
 }
 
 
-function checkIfStringIsValidInt(input){
-	if (isNaN(input)){
+function checkIfStringIsValidInt(input) {
+	if (isNaN(input)) {
 		return false
 	}
-	else{
-		if(Number(input) === parseInt(input, 10)){
+	else {
+		if (Number(input) === parseInt(input, 10)) {
 			return true
 		}
-		else{
+		else {
 			return false
 		}
 	}
@@ -493,8 +558,8 @@ function checkIfStringIsValidInt(input){
 //*****************************************************************************************************************************
 function processCommand(receivedMessage) {
 	let fullCommand = receivedMessage.content.substr(1) // Remove the leading exclamation mark
-	//let splitCommand = fullCommand.split(" ") // Split the message up in to pieces for each space
-	let splitCommand = fullCommand.split(/ +/) // Split the message up in to pieces for each space
+	let splitCommand = fullCommand.split(" ") // Split the message up in to pieces for each space
+	//let splitCommand = fullCommand.split(/ +/) // Split the message up in to pieces for each space
 	let primaryCommand = findCommand(splitCommand[0].toLowerCase()) // The first word directly after the exclamation is the command
 	let arguments = splitCommand.slice(1) // All other words are arguments/parameters/options for the command
 	//console.log(arguments)
@@ -582,10 +647,12 @@ function findCommand(primaryCommand) {
 		for (var commandNum = 0; commandNum < allCommands[listNum].length; commandNum++) {
 			//Command in List
 			if (primaryCommand == allCommands[listNum][commandNum]) {
+				console.log(allCommands[listNum][0])
 				return allCommands[listNum][0]
 			}
 		}
 	}
+	console.log("Invalid_Command")
 	return "Invalid_Command"
 }
 
