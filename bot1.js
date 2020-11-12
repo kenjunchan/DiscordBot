@@ -61,8 +61,8 @@ client.on('ready', () => {
 		console.log('Reminding Bobby to remind Mike to take meds');
 		client.channels.cache.get("758387764751499294").send("<@125805688797659138> remind mike to take meds!")
 	});
-	var cjPogCoins = schedule.scheduleJob('0 * * * *', function () {
-		let pogcoinStimulus = 100;
+	var cjPogCoins = schedule.scheduleJob('0,30 * * * *', function () {
+		let pogcoinStimulus = 150;
 		try {
 			database.update({}, { $inc: { pogcoins: pogcoinStimulus } }, { multi: true }, function (err, numReplaced) { console.log("Giving everyone " + pogcoinStimulus + " pogcoins") });
 		}
