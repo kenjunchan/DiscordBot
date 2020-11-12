@@ -436,7 +436,7 @@ function checkCoinLeaderboard(arguments, receivedMessage) {
 					fields.push([item.username, item.pogcoins]);
 				});
 				receivedMessage.channel.send("```\n" + table.table(fields) + "```\n");
-				receivedMessage.channel.send("Don't see your username? Update it with !register");
+				//receivedMessage.channel.send("Don't see your username? Update it with !register");
 			}
 			else {
 				receivedMessage.channel.send("DB error, perhaps it's empty?");
@@ -496,50 +496,45 @@ function gpcSlots(pogcoinsAmt, arguments, receivedMessage) {
 	if (randRoll == 1 || randRoll == 2) {
 		winamount = 5 * rollAmount;
 		changePogCoinBet(authID, winamount)
-		//receivedMessage.channel.send(new Discord.MessageAttachment('images/pepering.png'))
 		imgurl = "https://i.imgur.com/lsMhWZA.png" // pepering
-		//receivedMessage.channel.send("(5x) HOLY MOTHER OF POG!!! You won " + 5 * rollAmount + " pogcoins!")
-		emsg = "(5x) HOLY MOTHER OF POG!!! You won " + 5 * rollAmount + " pogcoins!";
+		emsg = "(5x) HOLY MOTHER OF POG!!! You won " + winamount + " pogcoins!";
 		
 	}
-	else if (randRoll >= 3 && randRoll <= 5) {
+	else if (randRoll >= 3 && randRoll <= 7) {
 		winamount = 3 * rollAmount;
 		changePogCoinBet(authID, winamount)
-		//receivedMessage.channel.send(new Discord.MessageAttachment('images/pepepoggers.png'))
-		//receivedMessage.channel.send("(3x) WOW POG! You won " + 3 * rollAmount + " pogcoins!")
 		imgurl = "https://i.imgur.com/0bNq11b.png" //pepepoggers
-		emsg = "(3x) WOW POG! You won " + 3 * rollAmount + " pogcoins!";
+		emsg = "(3x) WOW POG! You won " + winamount + " pogcoins!";
 	}
-	else if (randRoll >= 6 && randRoll <= 15) {
+	else if (randRoll >= 8 && randRoll <= 15) {
 		winamount = 2 * rollAmount;
 		changePogCoinBet(authID, winamount)
-		//receivedMessage.channel.send(new Discord.MessageAttachment('images/pepestonks.png'))
-		//receivedMessage.channel.send("(2x) DOUBLE DOUBLE!! You won " + 2 * rollAmount + " pogcoins!")
 		imgurl = "https://i.imgur.com/i41RLFv.png" //pepestonks
-		emsg = "(2x) DOUBLE DOUBLE!! You won " + 2 * rollAmount + " pogcoins!";
+		emsg = "(2x) DOUBLE DOUBLE!! You won " + winamount + " pogcoins!";
 
 	}
-	else if (randRoll >= 16 && randRoll <= 35) {
+	else if (randRoll >= 16 && randRoll <= 30) {
+		let halfamount = Math.round(.3 * rollAmount)
+		winamount = 1*rollAmount + 1*halfamount
+		changePogCoinBet(authID, 1*winamount)
+		imgurl =  "https://i.imgur.com/SLffH3s.png" //pepecheer
+		emsg = "(1.3x) NOT BAD! You won " + winamount + " pogcoins!";
+	}
+	else if (randRoll >= 31 && randRoll <= 49) {
 		winamount = 1 * rollAmount;
 		changePogCoinBet(authID, winamount)
-		//receivedMessage.channel.send(new Discord.MessageAttachment('images/pepeignore.png'))
-		//receivedMessage.channel.send("(1x) You lost nothing!")
 		imgurl = "https://i.imgur.com/D5Q8pG1.png" //pepeignore
 		emsg = "(1x) You lost nothing!"
 	}
-	else if (randRoll >= 36 && randRoll <= 64) {
+	else if (randRoll >= 50 && randRoll <= 72) {
 		let halfamount = Math.round(.5 * rollAmount)
 		changePogCoinBet(authID, halfamount)
 		winamount = halfamount;
-		//receivedMessage.channel.send(new Discord.MessageAttachment('images/pepesadge.png'))
-		//receivedMessage.channel.send("(.5x) You got " + halfamount + " pogcoins back")
 		imgurl = "https://i.imgur.com/YEuQ2iY.png" //pepesadge
-		emsg = "(.5x) You got " + halfamount + " pogcoins back"
+		emsg = "(.5x) You got " + winamount + " pogcoins back"
 
 	}
 	else {
-		//receivedMessage.channel.send(new Discord.MessageAttachment('images/pepekms.png'))
-		//receivedMessage.channel.send("(0x) You got nothing and lost " + rollAmount + " pogcoins")
 		winamount = 0;
 		imgurl = "https://i.imgur.com/L37ZPeW.png" //pepekms
 		emsg = "(0x) You got nothing and lost " + rollAmount + " pogcoins"
