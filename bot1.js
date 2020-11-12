@@ -381,7 +381,7 @@ function checkUserCoins(author, receivedMessage) {
 
 function checkCoinLeaderboard(arguments, receivedMessage) {
 	try {
-		database.find({}).sort({ pogcoins: -1 }).exec(function (err, data) {
+		database.find({}).sort({ pogcoins: -1 }).limit(10).exec(function (err, data) {
 			if (data != null) {
 				fields = [["Name", "Pogcoins"]];
 				
