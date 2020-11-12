@@ -142,10 +142,12 @@ function isInDB(arguments, receivedMessage) {
 		if (data == null) {
 			console.log('--can not find user: ' + receivedMessage.author.id + ', adding new entry')
 			database.insert({ discordID: receivedMessage.author.id, username: receivedMessage.author.username, pogcoins: 300 });
+			receivedMessage.channel.send("Registered user: " + receivedMessage.author.username);
 		}
 		else {
 			console.log('--found User: ' + data.discordID);
 			database.update({ discordID: data.discordID }, { $set: { username: receivedMessage.author.username } }, function (err, data) { console.log("Updated username for: " + receivedMessage.author.id) });
+			receivedMessage.channel.send("Updating username of user: " + receivedMessage.author.username);
 		}
 	})
 	return true;
@@ -255,11 +257,24 @@ function pogCoinCommand(arguments, receivedMessage) {
 			gamblePogCoinsSlot(arguments, receivedMessage)
 			break;
 		case "leaderboard":
-			checkCoinLeaderboard(arguments, receivedMessage);
+			checkCoinLeaderboard(arguments, receivedMessage)
+			break;
+		case "help":
+			pogcoinHelp(arguments,receivedMessage)
 			break;
 		case "":
 			break;
 	}
+}
+
+function pogcoinHelp(arguments, receivedMessage){
+	var helpmsg = "";
+	helpmsg += "```!register - registers you into the database"
+	helpmsg += "\n!p check or !p check <@username> - checks how many pogcoins you or specified person has"
+	helpmsg += "\n!p gamble <amount> - gamble your pogcoins away! rates are not favorable"
+	helpmsg += "\n!p give <amount> <@username> - give your pogcoins to the specified person"
+	helpmsg += "\n!p leaderboard - displays pogcoin leaderboard```"
+	receivedMessage.author.send(helpmsg)
 }
 
 function givePogcoins(arguments, receivedMessage) {
