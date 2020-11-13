@@ -491,7 +491,10 @@ function gpcSlots(pogcoinsAmt, arguments, receivedMessage) {
 	let emsg = "Something went wrong if this was sent";
 	let winamount = 0;
 	//console.log(parseInt(rollAmount, 10))
-	if (checkIfStringIsValidInt(rollAmount)) {
+	if (rollAmount == "all"){
+		rollAmount = pogcoinsAmt;
+	}
+	else if (checkIfStringIsValidInt(rollAmount)) {
 		//console.log("valid amount: " + rollAmount)
 	}
 	else {
@@ -548,9 +551,16 @@ function gpcSlots(pogcoinsAmt, arguments, receivedMessage) {
 		let halfamount = Math.round(.5 * rollAmount)
 		changePogCoinBet(authID, halfamount)
 		winamount = halfamount;
-		imgurl = "https://i.imgur.com/YEuQ2iY.png" //pepesadge
+		imgurl = "https://i.imgur.com/JjPZsJr.png" //pepefeelsbad
 		emsg = "(.5x) You got " + winamount + " pogcoins back"
 
+	}
+	else if (randRoll >= 71 && randRoll <= 80){
+		let quarteramount = Math.round(.25 * rollAmount)
+		changePogCoinBet(authID, quarteramount)
+		winamount = quarteramount;
+		imgurl = "https://i.imgur.com/YEuQ2iY.png" //pepesadge
+		emsg = "(.25x) Sad, at least you got " + winamount + " pogcoins back";
 	}
 	else {
 		winamount = 0;
