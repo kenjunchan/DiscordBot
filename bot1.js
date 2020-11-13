@@ -500,40 +500,40 @@ function gpcSlots(pogcoinsAmt, arguments, receivedMessage) {
 	}
 	console.log(authID + " rolled: " + randRoll + " gambled: " + rollAmount + " pog coins!");
 	changePogCoinBet(authID, -rollAmount);
-	if (randRoll == 1 || randRoll == 2) {
+	if (randRoll >= 1 && randRoll < 4) {
 		winamount = 5 * rollAmount;
 		changePogCoinBet(authID, winamount)
 		imgurl = "https://i.imgur.com/lsMhWZA.png" // pepering
 		emsg = "(5x) HOLY MOTHER OF POG!!! You won " + winamount + " pogcoins!";
 
 	}
-	else if (randRoll >= 3 && randRoll <= 7) {
+	else if (randRoll >= 4 && randRoll < 10) {
 		winamount = 3 * rollAmount;
 		changePogCoinBet(authID, winamount)
 		imgurl = "https://i.imgur.com/0bNq11b.png" //pepepoggers
 		emsg = "(3x) WOW POG! You won " + winamount + " pogcoins!";
 	}
-	else if (randRoll >= 8 && randRoll <= 15) {
+	else if (randRoll >= 10 && randRoll < 20) {
 		winamount = 2 * rollAmount;
 		changePogCoinBet(authID, winamount)
 		imgurl = "https://i.imgur.com/i41RLFv.png" //pepestonks
 		emsg = "(2x) DOUBLE DOUBLE!! You won " + winamount + " pogcoins!";
 
 	}
-	else if (randRoll >= 16 && randRoll <= 27) {
+	else if (randRoll >= 20 && randRoll < 33) {
 		let halfamount = Math.round(.3 * rollAmount)
 		winamount = 1 * rollAmount + 1 * halfamount
 		changePogCoinBet(authID, 1 * winamount)
 		imgurl = "https://i.imgur.com/SLffH3s.png" //pepecheer
 		emsg = "(1.3x) NOT BAD! You won " + winamount + " pogcoins!";
 	}
-	else if (randRoll >= 28 && randRoll <= 47) {
+	else if (randRoll >= 33 && randRoll < 53) {
 		winamount = 1 * rollAmount;
 		changePogCoinBet(authID, winamount)
 		imgurl = "https://i.imgur.com/D5Q8pG1.png" //pepeignore
 		emsg = "(1x) You lost nothing!"
 	}
-	else if (randRoll >= 48 && randRoll <= 70) {
+	else if (randRoll >= 53 && randRoll < 76) {
 		let halfamount = Math.round(.5 * rollAmount)
 		changePogCoinBet(authID, halfamount)
 		winamount = halfamount;
@@ -541,14 +541,14 @@ function gpcSlots(pogcoinsAmt, arguments, receivedMessage) {
 		emsg = "(.5x) You got " + winamount + " pogcoins back"
 
 	}
-	else if (randRoll >= 71 && randRoll <= 80) {
+	else if (randRoll >= 76 && randRoll < 86) {
 		let quarteramount = Math.round(.25 * rollAmount)
 		changePogCoinBet(authID, quarteramount)
 		winamount = quarteramount;
 		imgurl = "https://i.imgur.com/YEuQ2iY.png" //pepesadge
 		emsg = "(.25x) Sad, at least you got " + winamount + " pogcoins back";
 	}
-	else {
+	else{
 		winamount = 0;
 		imgurl = "https://i.imgur.com/L37ZPeW.png" //pepekms
 		emsg = "(0x) You got nothing and lost " + rollAmount + " pogcoins"
