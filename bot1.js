@@ -28,7 +28,7 @@ const pencaderCommands = ["pencader", "pen"];
 const pogPlantImageCommands = ["pogplant", "pp"];
 const magic8BallCommands = ["8ball", "magic", "8", "magic8ball", "m8"];
 const dogCommands = ["dog"];
-const catCommands = ["cat"];
+//const catCommands = ["cat"];
 const registerCommands = ["register"];
 const pCommands = ["pogcoins", "p"];
 const coinflipCommands = ["coin"]
@@ -39,7 +39,7 @@ const emptyCommands = [""];
 
 
 const allCommands = [helpCommands, opggCommands, allOpggCommands, championCommands, memeifyCommands, caesarRodneyCommands, pencaderCommands,
-	pogPlantImageCommands, magic8BallCommands, dogCommands, catCommands, registerCommands, pCommands, coinflipCommands, rollCommands, musicCommands, playCommands, emptyCommands];
+	pogPlantImageCommands, magic8BallCommands, dogCommands, registerCommands, pCommands, coinflipCommands, rollCommands, musicCommands, playCommands, emptyCommands];
 
 
 //Load Database
@@ -54,24 +54,7 @@ client.on('ready', () => {
 	console.log("DiscordBot Started")
 	console.log("Setting Automatic Database Compaction to " + dbCompactInterval + " ms")
 	database.persistence.setAutocompactionInterval(dbCompactInterval)
-	var j = schedule.scheduleJob('0 0 20 * * *', function () {
-		console.log('Reminding Bobby to remind Mike to take meds');
-		client.channels.cache.get("695729119324799068").send("<@117775966213898242> remind mike to take meds!")
-	});
-	var remindKen = schedule.scheduleJob('0 0 19 * * *', function () {
-		console.log('Reminding Bobby to remind Mike to take meds');
-		client.channels.cache.get("758387764751499294").send("<@125805688797659138> remind mike to take meds!")
-	});
-	var cjPogCoins = schedule.scheduleJob('0,30 * * * *', function () {
-		let pogcoinStimulus = 100;
-		try {
-			database.update({}, { $inc: { pogcoins: pogcoinStimulus } }, { multi: true }, function (err, numReplaced) { console.log("Giving everyone " + pogcoinStimulus + " pogcoins") });
-		}
-		catch (err) {
-			console.log("something went wrong with trying to give everyone pogcoins")
-		}
-	});
-
+	globalCronjobs()
 })
 
 client.on('message', (receivedMessage) => {
@@ -100,6 +83,36 @@ client.on('message', (receivedMessage) => {
 
 	}
 })
+
+function globalCronjobs(){
+	var remindBobby = schedule.scheduleJob('0 0 20 * * *', function () {
+		console.log('Reminding Bobby to remind Mike to take meds');
+		client.channels.cache.get("695729119324799068").send("<@117775966213898242> remind mike to take meds!")
+	});
+	/*
+	var remindKen = schedule.scheduleJob('0 0 19 * * *', function () {
+		console.log('Reminding Bobby to remind Mike to take meds');
+		client.channels.cache.get("758387764751499294").send("<@125805688797659138> remind mike to take meds!")
+	});
+	*/
+	var cjPogCoins = schedule.scheduleJob('0,30 * * * *', function () {
+		let pogcoinStimulus = 100;
+		try {
+			database.update({}, { $inc: { pogcoins: pogcoinStimulus } }, { multi: true }, function (err, numReplaced) { console.log("Giving everyone " + pogcoinStimulus + " pogcoins") });
+		}
+		catch (err) {
+			console.log("something went wrong with trying to give everyone pogcoins")
+		}
+	});
+	var newDay = schedule.scheduleJob('0 0 * * *', function () {
+		try {
+			database.update({}, { $set: {gambledRecently: false}}, {multi: true}, function (err, data) {console.log("setting gambledRecently for everyone to false")})
+		}
+		catch (err) {
+			console.log("something went wrong with setting gambledRecently for everyone to false")
+		}
+	});
+}
 
 function checkBannedWordsArray(message, bannedWords) {
 	var emoji;
@@ -154,39 +167,20 @@ function isInDB(arguments, receivedMessage) {
 }
 
 function testCommand(arguments, receivedMessage) {
-	/*
-	let s1 = await getSummonerFromName(arguments[0]);
-	let m1 = await getMatchListFromSummoner(s1);
-	getWinrateFromMatchlist(m1, s1);
-	*/
-	//let re = new RegExp('/^[a-z0-9]+$/i')
-	//console.log(re.test("-"))
-	//receivedMessage.channel.send(summoner.id + " " + summoner.accountId);
-	//console.log(checkIfStringIsValidInt(arguments[0]))
-	/*
-	receivedMessage.channel.send(new Discord.MessageAttachment('images/pepering.png'))
-	receivedMessage.channel.send(new Discord.MessageAttachment('images/pepepoggers.png'))
-	receivedMessage.channel.send(new Discord.MessageAttachment('images/pepestonks.png'))
-	receivedMessage.channel.send(new Discord.MessageAttachment('images/pepeignore.png'))
-	receivedMessage.channel.send(new Discord.MessageAttachment('images/pepesadge.png'))
-	receivedMessage.channel.send(new Discord.MessageAttachment('images/pepekms.png'))
-	*/
-	console.log(getPogCoinsFromDiscordID("125805688797659138"))
+	//database.update({ discordID: data.discordID }, { $set: { username: receivedMessage.author.username } }, function (err, data) { console.log("Updated username for: " + receivedMessage.author.id) });
+	
+	database.update({}, { $set: {gambledRecently: false}}, {multi: true}, function (err, data) {console.log("setting gambledRecently for everyone to false")})
 }
 //*****************************************************************************************************************************
 //RIOT API STUFF
 async function getSummonerFromName(summonerName) {
 	let getSummonerData = async () => {
 		let summonerDataAPI = "https://na1.api.riotgames.com/lol/summoner/v4/summoners/by-name/" + arguments[0] + "?api_key=" + riotAPIKey;
-		//console.log(summonerDataAPI);
 		let response = await axios.get(summonerDataAPI);
 		let summonerData = response.data
-		//console.log(summonerData);
 		return summonerData;
 	};
 	let summoner = await getSummonerData();
-	//receivedMessage.channel.send(summoner.id + " " + summoner.accountId);
-	//console.log(summoner);
 	return summoner;
 }
 async function getMatchListFromSummoner(summoner) {
@@ -203,17 +197,9 @@ async function getMatchListFromSummoner(summoner) {
 }
 
 function getWinrateFromMatchlist(matchlist, summoner) {
-	//console.log(matchlist)
-	/*
-	for (var match in matchlist){
-		console.log(match.gameId);
-	}
-	*/
 	for (var i = 0; i < matchlist.length; i++) {
 		var match = matchlist[i];
 		console.log(match.gameId);
-		//var matchData = getMatchDataFromGameId(match.gameId);
-
 	}
 }
 
@@ -260,14 +246,14 @@ function pogCoinCommand(arguments, receivedMessage) {
 			checkCoinLeaderboard(arguments, receivedMessage)
 			break;
 		case "help":
-			pogcoinHelp(arguments,receivedMessage)
+			pogcoinHelp(arguments, receivedMessage)
 			break;
 		case "":
 			break;
 	}
 }
 
-function pogcoinHelp(arguments, receivedMessage){
+function pogcoinHelp(arguments, receivedMessage) {
 	var helpmsg = "";
 	helpmsg += "```!register - registers you into the database"
 	helpmsg += "\n!p check or !p check <@username> - checks how many pogcoins you or specified person has"
@@ -397,7 +383,7 @@ function checkCoins(arguments, receivedMessage) {
 		}
 		database.findOne({ discordID: receivedMessage.author.id }, (err, data) => {
 			if (data != null) {
-				receivedMessage.channel.send("You have: " + data.pogcoins + " pogcoins!")
+				receivedMessage.channel.send(receivedMessage.author.username + " has: " + data.pogcoins + " pogcoins!")
 			}
 			else {
 				receivedMessage.channel.send("User not found, try typing !register");
@@ -413,7 +399,7 @@ function checkUserCoins(author, receivedMessage) {
 	try {
 		database.findOne({ discordID: author.id.toString() }, (err, data) => {
 			if (data != null) {
-				receivedMessage.channel.send("User: " + author.username + " has " + data.pogcoins + " pogcoins!")
+				receivedMessage.channel.send(author.username + " has: " + data.pogcoins + " pogcoins!")
 				//return data.pogcoins
 			}
 			else {
@@ -428,33 +414,32 @@ function checkUserCoins(author, receivedMessage) {
 
 function checkCoinLeaderboard(arguments, receivedMessage) {
 	try {
-		if (arguments[1] == "all"){
+		if (arguments[1] == "all") {
 			limit = Number.MAX_SAFE_INTEGER
 		}
-		else if (arguments[1] == null){
+		else if (arguments[1] == null) {
 			limit = 10;
 		}
-		else if (!checkIfStringIsValidInt(arguments[1])){
+		else if (!checkIfStringIsValidInt(arguments[1])) {
 			receivedMessage.channel.send("not a valid number!\n\!p leaderboard <number>")
 			return;
 		}
 		else {
 			limit = parseInt(arguments[1])
 		}
-		
-		
+
 		database.find({}).sort({ pogcoins: -1 }).exec(function (err, data) {
 			if (data != null) {
 				let amt = 0;
-				fields = [["Name", "Pogcoins"]];
+				fields = [["Name", "pogcoins"]];
 				data.forEach(function (item) {
-					if(item.username != null && amt < limit) {
+					if (item.username != null && amt < limit && item.gambledRecently == true) {
 						fields.push([item.username, item.pogcoins]);
 						amt++;
 					}
 				});
 				receivedMessage.channel.send("```\n" + table.table(fields) + "```\n");
-				//receivedMessage.channel.send("Don't see your username? Update it with !register");
+				receivedMessage.channel.send("Don't see your username? make sure you gambled today!");
 			}
 			else {
 				receivedMessage.channel.send("DB error, perhaps it's empty?");
@@ -478,6 +463,7 @@ function gamblePogCoinsSlot(arguments, receivedMessage) {
 				receivedMessage.channel.send("User " + receivedMessage.author.username + " not found, try typing !register");
 			}
 		})
+		database.update({ discordID : receivedMessage.author.id }, { $set: {gambledRecently: true}}, {multi: false}, function (err, data) {console.log("setting gambledRecently for " + receivedMessage.author.id + " to true")})
 	}
 	catch (err) {
 		receivedMessage.channel.send("Something went wrong!\n!p gamble <amount>")
@@ -491,7 +477,7 @@ function gpcSlots(pogcoinsAmt, arguments, receivedMessage) {
 	let emsg = "Something went wrong if this was sent";
 	let winamount = 0;
 	//console.log(parseInt(rollAmount, 10))
-	if (rollAmount == "all"){
+	if (rollAmount == "all") {
 		rollAmount = pogcoinsAmt;
 	}
 	else if (checkIfStringIsValidInt(rollAmount)) {
@@ -519,7 +505,7 @@ function gpcSlots(pogcoinsAmt, arguments, receivedMessage) {
 		changePogCoinBet(authID, winamount)
 		imgurl = "https://i.imgur.com/lsMhWZA.png" // pepering
 		emsg = "(5x) HOLY MOTHER OF POG!!! You won " + winamount + " pogcoins!";
-		
+
 	}
 	else if (randRoll >= 3 && randRoll <= 7) {
 		winamount = 3 * rollAmount;
@@ -536,9 +522,9 @@ function gpcSlots(pogcoinsAmt, arguments, receivedMessage) {
 	}
 	else if (randRoll >= 16 && randRoll <= 27) {
 		let halfamount = Math.round(.3 * rollAmount)
-		winamount = 1*rollAmount + 1*halfamount
-		changePogCoinBet(authID, 1*winamount)
-		imgurl =  "https://i.imgur.com/SLffH3s.png" //pepecheer
+		winamount = 1 * rollAmount + 1 * halfamount
+		changePogCoinBet(authID, 1 * winamount)
+		imgurl = "https://i.imgur.com/SLffH3s.png" //pepecheer
 		emsg = "(1.3x) NOT BAD! You won " + winamount + " pogcoins!";
 	}
 	else if (randRoll >= 28 && randRoll <= 47) {
@@ -555,7 +541,7 @@ function gpcSlots(pogcoinsAmt, arguments, receivedMessage) {
 		emsg = "(.5x) You got " + winamount + " pogcoins back"
 
 	}
-	else if (randRoll >= 71 && randRoll <= 80){
+	else if (randRoll >= 71 && randRoll <= 80) {
 		let quarteramount = Math.round(.25 * rollAmount)
 		changePogCoinBet(authID, quarteramount)
 		winamount = quarteramount;
@@ -578,6 +564,9 @@ function gpcSlots(pogcoinsAmt, arguments, receivedMessage) {
 	receivedMessage.channel.send({ embed });
 }
 
+function pogthief(){
+
+}
 
 function checkIfStringIsValidInt(input) {
 	if (isNaN(input)) {
@@ -603,7 +592,7 @@ function processCommand(receivedMessage) {
 	//console.log(arguments)
 	let re = new RegExp("^[a-zA-Z0-9]*$")
 	//console.log(splitCommand[0].toLowerCase())
-	if (splitCommand[0].toLowerCase() == "test") {
+	if (splitCommand[0].toLowerCase() == "test" && receivedMessage.author.id == "125805688797659138") {
 		console.log("running test command")
 		testCommand(arguments, receivedMessage)
 	}
@@ -650,9 +639,11 @@ function processCommand(receivedMessage) {
 					console.error(e)
 				}
 				break;
+			/*
 			case "cat":
 				catCommand(arguments, receivedMessage)
 				break;
+			*/
 			case "register":
 				isInDB(arguments, receivedMessage)
 				break;
