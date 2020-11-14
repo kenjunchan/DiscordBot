@@ -498,7 +498,7 @@ function gpcSlots(pogcoinsAmt, arguments, receivedMessage) {
 		rollAmount = pogcoinsAmt;
 	}
 	if (rollAmount == "min") {
-		rollAmount = Math.round(.1 * pogcoinsAmt)
+		rollAmount = Math.round(.05 * pogcoinsAmt)
 	}
 	else if (checkIfStringIsValidInt(rollAmount)) {
 
@@ -509,8 +509,8 @@ function gpcSlots(pogcoinsAmt, arguments, receivedMessage) {
 	}
 	let authID = receivedMessage.author.id
 	if (rollAmount < Math.round(.1 * pogcoinsAmt)) {
-		receivedMessage.channel.send("minimum amount to roll is 10% of your pog coins\nthe minimum for " + receivedMessage.author.username + " is: " + Math.round(.1 * pogcoinsAmt) + " pogcoins")
-		console.log("minimum to roll is 10%")
+		receivedMessage.channel.send("minimum amount to roll is 5% of your pog coins\nthe minimum for " + receivedMessage.author.username + " is: " + Math.round(.05 * pogcoinsAmt) + " pogcoins")
+		console.log("minimum to roll is 5%")
 		return;
 	}
 	if (rollAmount > pogcoinsAmt) {
