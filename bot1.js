@@ -635,7 +635,6 @@ function megapogmillion(arguments, receivedMessage) {
 				changePogCoin(receivedMessage.author.id, -megapogmillioncost);
 				changePogCoin("pogthief", Math.round(megapogmillioncost * .25));
 				let randRoll = Math.floor(Math.random() * Math.floor(500)) + 1;
-				randRoll = luckynumber
 				if (randRoll == luckynumber) {
 					database.findOne({ discordID: "pogthief" }, (err, pogthief) => {
 						//receivedMessage.channel.send("MEGA POGGERINOS YOU WON THE MEGA POG MILLION JACKPOT OF " + data.pogcoins + " POGCOINS!")
