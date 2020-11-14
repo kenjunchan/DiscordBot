@@ -269,8 +269,10 @@ function pogcoinHelp(arguments, receivedMessage) {
 	var helpmsg = "";
 	helpmsg += "```!register - registers you into the database"
 	helpmsg += "\n!p check or !p check <@username> - checks how many pogcoins you or specified person has"
-	helpmsg += "\n!p gamble <amount or all> - gamble your pogcoins away! rates are not favorable"
+	helpmsg += "\n!p gamble <amount/all/min> - gamble your pogcoins away! rates are not favorable"
 	helpmsg += "\n!p give <amount> <@username> - give your pogcoins to the specified person"
+	helpmsg += "\n!p mega - roll for the mega pog million jackpot"
+	helpmsg += "\n!p mega jackpot - displays mega pog million jackpot"
 	helpmsg += "\n!p leaderboard <number or all>- displays pogcoin leaderboard```"
 	receivedMessage.author.send(helpmsg)
 }
