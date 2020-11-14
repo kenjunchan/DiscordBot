@@ -84,7 +84,7 @@ client.on('message', (receivedMessage) => {
 	}
 })
 
-function globalCronjobs(){
+function globalCronjobs() {
 	var remindBobby = schedule.scheduleJob('0 0 20 * * *', function () {
 		console.log('Reminding Bobby to remind Mike to take meds');
 		client.channels.cache.get("695729119324799068").send("<@117775966213898242> remind mike to take meds!")
@@ -106,7 +106,7 @@ function globalCronjobs(){
 	});
 	var newDay = schedule.scheduleJob('0 0 * * *', function () {
 		try {
-			database.update({}, { $set: {gambledRecently: false}}, {multi: true}, function (err, data) {console.log("setting gambledRecently for everyone to false")})
+			database.update({}, { $set: { gambledRecently: false } }, { multi: true }, function (err, data) { console.log("setting gambledRecently for everyone to false") })
 		}
 		catch (err) {
 			console.log("something went wrong with setting gambledRecently for everyone to false")
@@ -331,7 +331,7 @@ function changePogCoin(authorID, amount) {
 	database.findOne({ discordID: authorID }, (err, data) => {
 		if (data != null) {
 			database.update({ discordID: authorID }, { $inc: { pogcoins: amount } }, { multi: false }, function (err, numReplaced) { console.log("Changed User: " + authorID + " pogcoins by " + amount) });
-			
+
 		}
 		else {
 			//receivedMessage.channel.send("Could not find user, Try typing !register");
@@ -497,7 +497,7 @@ function gpcSlots(pogcoinsAmt, arguments, receivedMessage) {
 	if (rollAmount == "all") {
 		rollAmount = pogcoinsAmt;
 	}
-	if (rollAmount == "min"){
+	if (rollAmount == "min") {
 		rollAmount = Math.round(.1 * pogcoinsAmt)
 	}
 	else if (checkIfStringIsValidInt(rollAmount)) {
@@ -509,13 +509,17 @@ function gpcSlots(pogcoinsAmt, arguments, receivedMessage) {
 	}
 	let authID = receivedMessage.author.id
 	if (rollAmount < Math.round(.1 * pogcoinsAmt)) {
-		receivedMessage.channel.send("minimum amount to roll is 10% of your pog coins\nyour minimum is: " + Math.round(.1 * pogcoinsAmt) + " pogcoins")
+		receivedMessage.channel.send("minimum amount to roll is 10% of your pog coins\nthe minimum for " + receivedMessage.author.username + " is: " + Math.round(.1 * pogcoinsAmt) + " pogcoins")
 		console.log("minimum to roll is 10%")
 		return;
 	}
 	if (rollAmount > pogcoinsAmt) {
 		receivedMessage.channel.send("Insufficient pogcoins to gamble")
 		console.log("insufficient pogcoins to roll")
+		return;
+	}
+	if (rollAmount < 10) {
+		receivedMessage.channel.send("minimum pogcoins to roll is 10")
 		return;
 	}
 	console.log(authID + " rolled: " + randRoll + " gambled: " + rollAmount + " pog coins!");
@@ -568,13 +572,13 @@ function gpcSlots(pogcoinsAmt, arguments, receivedMessage) {
 		imgurl = "https://i.imgur.com/YEuQ2iY.png" //pepesadge
 		emsg = "(.25x) Sad, at least you got " + winamount + " pogcoins back";
 	}
-	else{
+	else {
 		winamount = 0;
 		imgurl = "https://i.imgur.com/L37ZPeW.png" //pepekms
 		emsg = "(0x) You got nothing and lost " + rollAmount + " pogcoins"
 	}
 
-	database.update({ discordID : receivedMessage.author.id }, { $set: {gambledRecently: true}}, {multi: false}, function (err, data) {console.log("setting gambledRecently for " + receivedMessage.author.id + " to true")})
+	database.update({ discordID: receivedMessage.author.id }, { $set: { gambledRecently: true } }, { multi: false }, function (err, data) { console.log("setting gambledRecently for " + receivedMessage.author.id + " to true") })
 	changePogCoin("pogthief", Math.round(rollAmount * .25))
 
 	const embed = new Discord.MessageEmbed()
@@ -587,23 +591,21 @@ function gpcSlots(pogcoinsAmt, arguments, receivedMessage) {
 	receivedMessage.channel.send({ embed });
 }
 
-function pogsteal(){
+function pogsteal() {
 	database.find({}).sort({ pogcoins: -1 }).exec(function (err, data) {
 		if (data != null) {
 			let amt = 3;
 			//fields = [["Name", "pogcoins"]];
 			data.forEach(function (item) {
 				if (item.username != null && amt > 0) {
-					pogcoinstolen = Math.round((amt/100)*item.pogcoins)
+					pogcoinstolen = Math.round((amt / 100) * item.pogcoins)
 					changePogCoin(item.discordID, -pogcoinstolen)
-					database.update({discordID: "pogthief"}, { $inc: { pogcoins:  pogcoinstolen} }, { multi: true }, function (err, numReplaced) {  });
-					database.update({discordID: "pogthief"}, { $inc: { totalstolen:  pogcoinstolen} }, { multi: true }, function (err, numReplaced) {  });
+					database.update({ discordID: "pogthief" }, { $inc: { pogcoins: pogcoinstolen } }, { multi: true }, function (err, numReplaced) { });
+					database.update({ discordID: "pogthief" }, { $inc: { totalstolen: pogcoinstolen } }, { multi: true }, function (err, numReplaced) { });
 					console.log("stealing " + pogcoinstolen + " pogcoins from " + item.username)
 					amt--;
 				}
 			});
-			//receivedMessage.channel.send("```\n" + table.table(fields) + "```\n");
-			//receivedMessage.channel.send("Don't see your username? make sure you gambled today!");
 		}
 		else {
 			receivedMessage.channel.send("DB error, perhaps it's empty?");
@@ -611,37 +613,55 @@ function pogsteal(){
 	});
 }
 
-function megapogmillion(arguments, receivedMessage){
+function megapogmillion(arguments, receivedMessage) {
 	const megapogmillioncost = 100
 	const luckynumber = 111
 	let command = arguments[1]
 	if (command == "jackpot") {
-		database.findOne({discordID: "pogthief"}, (err, data) => {
+		database.findOne({ discordID: "pogthief" }, (err, data) => {
 			receivedMessage.channel.send("The current Mega Pog Million Jackpot is " + data.pogcoins + " pogcoins!");
 		})
 	}
 	else if (command == null) {
 		console.log("megapogmillion roll")
-		database.findOne({discordID: receivedMessage.author.id}, (err, data) =>{
-			if(data == null || data.pogcoins == null){
+		database.findOne({ discordID: receivedMessage.author.id }, (err, data) => {
+			if (data == null || data.pogcoins == null) {
 				receivedMessage.channel.send("Something went wrong, try registering with !register")
 			}
-			else if(data.pogcoins < megapogmillioncost){
-				receivedMessage.channel.send("Insufficient pogcoins to gamble need 100")
+			else if (data.pogcoins < megapogmillioncost) {
+				receivedMessage.channel.send("Insufficient pogcoins to gamble, you need 100 pog coins")
 			}
-			else{
+			else {
 				changePogCoin(receivedMessage.author.id, -megapogmillioncost);
-				changePogCoin("pogthief", Math.round(megapogmillioncost*.25));
+				changePogCoin("pogthief", Math.round(megapogmillioncost * .25));
 				let randRoll = Math.floor(Math.random() * Math.floor(500)) + 1;
-				if (randRoll == luckynumber){
-					database.findOne({discordID: "pogthief"}, (err, data) => {
-						receivedMessage.channel.send("MEGA POGGERINOS YOU WON THE MEGA POG MILLION JACKPOT OF " + data.pogcoins + " POGCOINS!")
-						changePogCoin(receivedMessage.author.id, data.pogcoins)
-						database.update({discordID: "pogthief"}, { $set: { pogcoins:  0} }, { multi: true }, function (err, numReplaced) {  })
+				randRoll = luckynumber
+				if (randRoll == luckynumber) {
+					database.findOne({ discordID: "pogthief" }, (err, pogthief) => {
+						//receivedMessage.channel.send("MEGA POGGERINOS YOU WON THE MEGA POG MILLION JACKPOT OF " + data.pogcoins + " POGCOINS!")
+						const embed = new Discord.MessageEmbed()
+							//.setColor()
+							.setAuthor("MEGA-POG-MILLIONS", "https://i.imgur.com/MvUYFja.png")
+							.setThumbnail("https://i.imgur.com/lsMhWZA.png")
+							.setFooter(receivedMessage.author.username + " now has " + (data.pogcoins + pogthief.pogcoins) + " pogcoins!")
+							.setDescription("```" + "MEGA POGGERINOS YOU WON THE MEGA POG MILLION JACKPOT OF " + pogthief.pogcoins + " POGCOINS!" + "```");
+
+						receivedMessage.channel.send({ embed });
+
+						changePogCoin(receivedMessage.author.id, pogthief.pogcoins)
+						database.update({ discordID: "pogthief" }, { $set: { pogcoins: 0 } }, { multi: true }, function (err, numReplaced) { })
 					})
 				}
 				else {
-					receivedMessage.channel.send("Unlucky! You rolled: " + randRoll + " and the winning number is: " + luckynumber)
+					//receivedMessage.channel.send("Unlucky! You rolled: " + randRoll + " and the winning number is: " + luckynumber)
+					const embed = new Discord.MessageEmbed()
+						//.setColor()
+						.setAuthor("MEGA-POG-MILLIONS", "https://i.imgur.com/MvUYFja.png")
+						.setThumbnail("https://i.imgur.com/JjPZsJr.png")
+						//.setFooter("")
+						.setDescription("```" + "Unlucky! You rolled: " + randRoll + " and the winning number is: " + luckynumber + "```");
+
+					receivedMessage.channel.send({ embed });
 				}
 			}
 		})
@@ -650,19 +670,6 @@ function megapogmillion(arguments, receivedMessage){
 		receivedMessage.channel.send("not a valid mega pog million command!\n!p mega <jackpot/null>")
 		return;
 	}
-	/*
-	let authID = receivedMessage.author.id
-	if (rollAmount < 10) {
-		receivedMessage.channel.send("minimum amount to roll is 10")
-		console.log("minimum to roll is 10")
-		return;
-	}
-	if (rollAmount > pogcoinsAmt) {
-		receivedMessage.channel.send("Insufficient pogcoins to gamble")
-		console.log("insufficient pogcoins to roll")
-		return;
-	}
-	*/
 }
 
 
