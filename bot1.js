@@ -659,7 +659,7 @@ function megapogmillion(arguments, receivedMessage) {
 						//.setColor()
 						.setAuthor("MEGA-POG-MILLIONS", "https://i.imgur.com/MvUYFja.png")
 						.setThumbnail("https://i.imgur.com/JjPZsJr.png")
-						//.setFooter("")
+						.setFooter(receivedMessage.author.username + " now has " + (data.pogcoins - megapogmillioncost) + " pogcoins!")
 						.setDescription("```" + "Unlucky! You rolled: " + randRoll + " and the winning number is: " + luckynumber + "```");
 
 					receivedMessage.channel.send({ embed });
