@@ -178,7 +178,7 @@ function testCommand(arguments, receivedMessage) {
 	//database.update({ discordID: data.discordID }, { $set: { username: receivedMessage.author.username } }, function (err, data) { console.log("Updated username for: " + receivedMessage.author.id) });
 	//database.update({}, { $set: {gambledRecently: false}}, {multi: true}, function (err, data) {console.log("setting gambledRecently for everyone to false")})
 	//database.insert({ discordID: "pogthief", username: "pogthief", pogcoins: 0, totalstolen: 0,  recentTarget: null, recentAmount: 0 , gambledRecently: false}, function (err, newDoc){})
-	pogsteal()
+	//pogsteal()
 }
 //*****************************************************************************************************************************
 //RIOT API STUFF
@@ -476,7 +476,6 @@ function gamblePogCoinsSlot(arguments, receivedMessage) {
 				receivedMessage.channel.send("User " + receivedMessage.author.username + " not found, try typing !register");
 			}
 		})
-		database.update({ discordID : receivedMessage.author.id }, { $set: {gambledRecently: true}}, {multi: false}, function (err, data) {console.log("setting gambledRecently for " + receivedMessage.author.id + " to true")})
 	}
 	catch (err) {
 		receivedMessage.channel.send("Something went wrong!\n!p gamble <amount>")
@@ -498,17 +497,20 @@ function gpcSlots(pogcoinsAmt, arguments, receivedMessage) {
 	if (rollAmount == "all") {
 		rollAmount = pogcoinsAmt;
 	}
+	if (rollAmount == "min"){
+		rollAmount = Math.round(.1 * pogcoinsAmt)
+	}
 	else if (checkIfStringIsValidInt(rollAmount)) {
-		//console.log("valid amount: " + rollAmount)
+
 	}
 	else {
 		receivedMessage.channel.send("not a valid number to gamble!\n!p gamble <amount>")
 		return;
 	}
 	let authID = receivedMessage.author.id
-	if (rollAmount < 10) {
-		receivedMessage.channel.send("minimum amount to roll is 10")
-		console.log("minimum to roll is 10")
+	if (rollAmount < Math.round(.1 * pogcoinsAmt)) {
+		receivedMessage.channel.send("minimum amount to roll is 10% of your pog coins\nyour minimum is: " + Math.round(.1 * pogcoinsAmt) + " pogcoins")
+		console.log("minimum to roll is 10%")
 		return;
 	}
 	if (rollAmount > pogcoinsAmt) {
@@ -518,40 +520,40 @@ function gpcSlots(pogcoinsAmt, arguments, receivedMessage) {
 	}
 	console.log(authID + " rolled: " + randRoll + " gambled: " + rollAmount + " pog coins!");
 	changePogCoinBet(authID, -rollAmount);
-	if (randRoll >= 1 && randRoll < 4) {
+	if (randRoll >= 1 && randRoll < 3) {
 		winamount = 5 * rollAmount;
 		changePogCoinBet(authID, winamount)
 		imgurl = "https://i.imgur.com/lsMhWZA.png" // pepering
 		emsg = "(5x) HOLY MOTHER OF POG!!! You won " + winamount + " pogcoins!";
 
 	}
-	else if (randRoll >= 4 && randRoll < 10) {
+	else if (randRoll >= 3 && randRoll < 7) {
 		winamount = 3 * rollAmount;
 		changePogCoinBet(authID, winamount)
 		imgurl = "https://i.imgur.com/0bNq11b.png" //pepepoggers
 		emsg = "(3x) WOW POG! You won " + winamount + " pogcoins!";
 	}
-	else if (randRoll >= 10 && randRoll < 18) {
+	else if (randRoll >= 7 && randRoll < 13) {
 		winamount = 2 * rollAmount;
 		changePogCoinBet(authID, winamount)
 		imgurl = "https://i.imgur.com/i41RLFv.png" //pepestonks
 		emsg = "(2x) DOUBLE DOUBLE!! You won " + winamount + " pogcoins!";
 
 	}
-	else if (randRoll >= 18 && randRoll < 30) {
+	else if (randRoll >= 13 && randRoll < 25) {
 		let halfamount = Math.round(.3 * rollAmount)
 		winamount = 1 * rollAmount + 1 * halfamount
 		changePogCoinBet(authID, 1 * winamount)
 		imgurl = "https://i.imgur.com/SLffH3s.png" //pepecheer
 		emsg = "(1.3x) NOT BAD! You won " + winamount + " pogcoins!";
 	}
-	else if (randRoll >= 30 && randRoll < 45) {
+	else if (randRoll >= 25 && randRoll < 38) {
 		winamount = 1 * rollAmount;
 		changePogCoinBet(authID, winamount)
 		imgurl = "https://i.imgur.com/D5Q8pG1.png" //pepeignore
 		emsg = "(1x) You lost nothing!"
 	}
-	else if (randRoll >= 45 && randRoll < 70) {
+	else if (randRoll >= 38 && randRoll < 63) {
 		let halfamount = Math.round(.5 * rollAmount)
 		changePogCoinBet(authID, halfamount)
 		winamount = halfamount;
@@ -559,7 +561,7 @@ function gpcSlots(pogcoinsAmt, arguments, receivedMessage) {
 		emsg = "(.5x) You got " + winamount + " pogcoins back"
 
 	}
-	else if (randRoll >= 70 && randRoll < 84) {
+	else if (randRoll >= 63 && randRoll < 81) {
 		let quarteramount = Math.round(.25 * rollAmount)
 		changePogCoinBet(authID, quarteramount)
 		winamount = quarteramount;
@@ -571,6 +573,9 @@ function gpcSlots(pogcoinsAmt, arguments, receivedMessage) {
 		imgurl = "https://i.imgur.com/L37ZPeW.png" //pepekms
 		emsg = "(0x) You got nothing and lost " + rollAmount + " pogcoins"
 	}
+
+	database.update({ discordID : receivedMessage.author.id }, { $set: {gambledRecently: true}}, {multi: false}, function (err, data) {console.log("setting gambledRecently for " + receivedMessage.author.id + " to true")})
+	changePogCoin("pogthief", Math.round(rollAmount * .25))
 
 	const embed = new Discord.MessageEmbed()
 		//.setColor()
@@ -618,7 +623,10 @@ function megapogmillion(arguments, receivedMessage){
 	else if (command == null) {
 		console.log("megapogmillion roll")
 		database.findOne({discordID: receivedMessage.author.id}, (err, data) =>{
-			if(data.pogcoins < megapogmillioncost){
+			if(data == null || data.pogcoins == null){
+				receivedMessage.channel.send("Something went wrong, try registering with !register")
+			}
+			else if(data.pogcoins < megapogmillioncost){
 				receivedMessage.channel.send("Insufficient pogcoins to gamble need 100")
 			}
 			else{
