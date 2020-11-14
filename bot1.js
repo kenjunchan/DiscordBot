@@ -508,7 +508,7 @@ function gpcSlots(pogcoinsAmt, arguments, receivedMessage) {
 		return;
 	}
 	let authID = receivedMessage.author.id
-	if (rollAmount < Math.round(.1 * pogcoinsAmt)) {
+	if (rollAmount < Math.round(.05 * pogcoinsAmt)) {
 		receivedMessage.channel.send("minimum amount to roll is 5% of your pog coins\nthe minimum for " + receivedMessage.author.username + " is: " + Math.round(.05 * pogcoinsAmt) + " pogcoins")
 		console.log("minimum to roll is 5%")
 		return;
