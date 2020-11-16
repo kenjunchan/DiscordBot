@@ -179,7 +179,7 @@ function testCommand(arguments, receivedMessage) {
 	//database.update({}, { $set: {gambledRecently: false}}, {multi: true}, function (err, data) {console.log("setting gambledRecently for everyone to false")})
 	//database.insert({ discordID: "pogthief", username: "pogthief", pogcoins: 0, totalstolen: 0,  recentTarget: null, recentAmount: 0 , gambledRecently: false}, function (err, newDoc){})
 	//pogsteal()
-	database.update({ discordID: "pogthief" }, { $set: { luckynumber: 167 } }, { multi: true }, function (err, numReplaced) { })
+	//database.update({ discordID: "pogthief" }, { $set: { luckynumber: 167 } }, { multi: true }, function (err, numReplaced) { })
 
 }
 //*****************************************************************************************************************************
@@ -589,6 +589,7 @@ function gpcSlots(pogcoinsAmt, arguments, receivedMessage) {
 
 	const embed = new Discord.MessageEmbed()
 		//.setColor()
+		.setTitle("You gambled " + rollAmount + " pogcoins!")
 		.setAuthor("pog-sino", "https://i.imgur.com/MvUYFja.png")
 		.setThumbnail(imgurl)
 		.setFooter(receivedMessage.author.username + " now has " + (pogcoinsAmt - rollAmount + winamount) + " pogcoins!")
@@ -642,11 +643,11 @@ function megapogmillion(arguments, receivedMessage) {
 				changePogCoin(receivedMessage.author.id, -megapogmillioncost);
 				changePogCoin("pogthief", Math.round(megapogmillioncost * .25));
 				database.findOne({ discordID: "pogthief" }, (err, pogthief) => {
-					let randRoll = Math.floor(Math.random() * Math.floor(500)) + 1;
+					let randRoll = Math.floor(Math.random() * Math.floor(1000)) + 1;
 					if (randRoll == pogthief.luckynumber) {
 						const embed = new Discord.MessageEmbed()
 							.setAuthor("MEGA-POG-MILLIONS", "https://i.imgur.com/MvUYFja.png")
-							.setThumbnail("https://i.imgur.com/lsMhWZA.png")
+							.setThumbnail("https://i.imgur.com/W5U5KXa.png") //pepeking
 							.setFooter(receivedMessage.author.username + " now has " + (data.pogcoins + pogthief.pogcoins) + " pogcoins!")
 							.setDescription("```" + "MEGA POGGERINOS YOU WON THE MEGA POG MILLION JACKPOT OF " + pogthief.pogcoins + " POGCOINS!" + "```");
 						receivedMessage.channel.send({ embed });
@@ -655,11 +656,12 @@ function megapogmillion(arguments, receivedMessage) {
 						database.update({ discordID: "pogthief" }, { $set: { pogcoins: 0 } }, { multi: false }, function (err, numReplaced) { })
 
 						//change lucky number
-						let newluckynumber = Math.floor(Math.random() * Math.floor(500)) + 1;
+						let newluckynumber = Math.floor(Math.random() * Math.floor(1000)) + 1;
 						database.update({ discordID: "pogthief" }, { $set: { luckynumber: newluckynumber } }, { multi: false }, function (err, numReplaced) { })
 					}
 					else {
 						const embed = new Discord.MessageEmbed()
+							.setTitle("Mega Pog Million Jackpot is " + pogthief.pogcoins + " pogcoins!")
 							.setAuthor("MEGA-POG-MILLIONS", "https://i.imgur.com/MvUYFja.png")
 							.setThumbnail("https://i.imgur.com/JjPZsJr.png")
 							.setFooter(receivedMessage.author.username + " now has " + (data.pogcoins - megapogmillioncost) + " pogcoins!")
