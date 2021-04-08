@@ -120,6 +120,14 @@ function globalCronjobs() {
 			console.log(err)
 		}
 	});
+	var danjaywalker = new schedule.scheduleJob('0 */12 * * *', function () {
+		try {
+			client.channels.get('697447991367303188').send("https://na.op.gg/multi/query=dayuni%2Cajaywalker");
+		}
+		catch (err) {
+			console.log(err)
+		}
+	});
 }
 
 function checkBannedWordsArray(message, bannedWords) {
@@ -180,6 +188,7 @@ function testCommand(arguments, receivedMessage) {
 	//database.insert({ discordID: "pogthief", username: "pogthief", pogcoins: 0, totalstolen: 0,  recentTarget: null, recentAmount: 0 , gambledRecently: false}, function (err, newDoc){})
 	//pogsteal()
 	//database.update({ discordID: "pogthief" }, { $set: { luckynumber: 167 } }, { multi: true }, function (err, numReplaced) { })
+	client.channels.get('697447991367303188').send("https://na.op.gg/multi/query=dayuni%2Cajaywalker");
 
 }
 //*****************************************************************************************************************************
