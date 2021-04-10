@@ -120,7 +120,7 @@ function globalCronjobs() {
 			console.log(err)
 		}
 	});
-	var danjaywalker = new schedule.scheduleJob('0 */12 * * *', function () {
+	var danjaywalker = new schedule.scheduleJob('0 20 * * *', function () {
 		try {
 			client.channels.cache.get('697447991367303188').send("https://na.op.gg/multi/query=dayuni%2Cajaywalker");
 		}
