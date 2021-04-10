@@ -23,6 +23,7 @@ const testCommands = ["test", "t"];
 const helpCommands = ["help"];
 const opggCommands = ["opgg", "op.gg"];
 const allOpggCommands = ["aopgg", "a.op.gg"];
+const statsCommands = ["stats", "stat", "s"];
 const championCommands = ["champ", "ch"];
 const memeifyCommands = ["meme", "me"];
 const pogPlantImageCommands = ["pogplant", "pp"];
@@ -31,7 +32,7 @@ const dogCommands = ["dog"];
 const coinflipCommands = ["coin", "c"]
 const emptyCommands = [""];
 
-const allCommands = [testCommands, helpCommands, opggCommands, allOpggCommands, championCommands, memeifyCommands, pogPlantImageCommands, magic8BallCommands, dogCommands, coinflipCommands, emptyCommands];
+const allCommands = [testCommands, helpCommands, opggCommands, allOpggCommands, statsCommands, championCommands, memeifyCommands, pogPlantImageCommands, magic8BallCommands, dogCommands, coinflipCommands, emptyCommands];
 
 //Load Database
 const database = new Datastore('pogplantdatastore.db');
@@ -123,15 +124,18 @@ function isInDB(arguments, receivedMessage) {
 	return true;
 }
 
+function getWinrate(wins, losses){
+	if((wins + losses) == 0){
+		return 0;
+	}
+	return (wins/(wins + losses));
+}
+
 async function testCommand(arguments, receivedMessage) {
 	if(receivedMessage.author.id != testerID){
 		return;
 	}
-	//let summoner = await getSummonerFromName(arguments[0]);
-	//console.log(summoner['id'])
-	let SoloqStats = await getSoloQStatsFromSummonerID(await getSummonerIDFromSummoner(await getSummonerFromName([arguments[0]])));
-	//console.log(SoloqStats);
-	//SoloqStats.length
+
 
 }
 //*****************************************************************************************************************************
@@ -168,7 +172,6 @@ async function getSoloQStatsFromSummonerID(summonerID){
 			SOLOQ = SoloqStats[i];
 		}
 	}
-	//console.log(SOLOQ);
 
 	return SOLOQ;
 }
@@ -251,6 +254,9 @@ function processCommand(receivedMessage) {
 				break;
 			case "aopgg":
 				allOpggCommand(arguments, receivedMessage)
+				break;
+			case "stats":
+				statsCommand(arguments, receivedMessage)
 				break;
 			case "champ":
 				champggCommand(arguments, receivedMessage)
@@ -361,6 +367,82 @@ function champggCommand(arguments, receivedMessage) {
 	else {
 		receivedMessage.channel.send("Incorrect Input: !champ [champion name] [position/role]")
 	}
+}
+
+async function statsCommand(arguments,  receivedMessage){
+	let SoloqStats = await getSoloQStatsFromSummonerID(await getSummonerIDFromSummoner(await getSummonerFromName([arguments.join('')])));
+	if(SoloqStats == null){
+		receivedMessage.channel.send("Summoner Not Found");
+	}
+
+	const embedMessage = new Discord.MessageEmbed()
+		.setAuthor(SoloqStats['summonerName'])													
+	
+	let rankedIconURL = "https://i.imgur.com/XXsF8SZ.png" // default silver
+	let colorHEX = "#A0B5BA" // default silver
+	let eTitle = ""
+	let eDesc = ""
+	switch(SoloqStats['tier']){
+		case 'IRON':
+			eTitle += "Iron " + SoloqStats['rank']
+			colorHEX = "#4F4F4F"
+			rankedIconURL = "https://i.imgur.com/93pc8Ws.png"
+			break;
+		case 'BRONZE':
+			eTitle += "Bronze " + SoloqStats['rank']
+			colorHEX = "#A4855C"
+			rankedIconURL = "https://i.imgur.com/xBcS66N.png"
+			break;
+		case 'SILVER':
+			eTitle += "Silver " + SoloqStats['rank']
+			colorHEX = "#A0B5BA"
+			rankedIconURL = "https://i.imgur.com/XXsF8SZ.png"
+			break;
+		case 'GOLD':
+			eTitle += "Gold " + SoloqStats['rank']
+			colorHEX = "#EAB249"
+			rankedIconURL = "https://i.imgur.com/bvySBsx.png"
+			break;
+		case 'PLATINUM':
+			eTitle += "Platinum " + SoloqStats['rank']
+			colorHEX = "#5ABBCC"
+			rankedIconURL = "https://i.imgur.com/jpOdDbY.png"
+			break;
+		case 'DIAMOND':
+			eTitle += "Diamond " + SoloqStats['rank']
+			colorHEX = "#7187FF"
+			rankedIconURL = "https://i.imgur.com/XSV2xSV.png"
+			break;
+		case 'MASTER':
+			eTitle += "Master"
+			colorHEX = "#E971FF"
+			rankedIconURL = "https://i.imgur.com/rZbl7e3.png"
+			break;
+		case 'GRANDMASTER':
+			eTitle += "Grandmaster"
+			colorHEX = "#FF7171"
+			rankedIconURL = "https://imgur.com/LBw0aFo.png"
+			break;
+		case 'CHALLENGER':
+			eTitle += "Challenger"
+			colorHEX = "#FFE07B"
+			rankedIconURL = "https://imgur.com/RuQsAWD.png"
+			break;
+		default:
+			eTitle += "Error"
+			break;
+	}
+
+	eTitle += ", " + SoloqStats['leaguePoints'] + " LP"
+	embedMessage.setTitle(eTitle);
+	embedMessage.setThumbnail(rankedIconURL);
+	let winrateString = (Math.floor(getWinrate(SoloqStats['wins'], SoloqStats['losses']) * 100) + "% WR");
+	eDesc += SoloqStats['wins'] + "W " + SoloqStats['losses'] + "L | " + winrateString
+	embedMessage.setDescription(eDesc);
+	embedMessage.setFooter("Requested by: " + receivedMessage.author.username);
+	embedMessage.setColor(colorHEX);
+	receivedMessage.channel.send(embedMessage);
+	receivedMessage.delete();
 }
 
 function memeifyChatCommand(arguments, receivedMessage) {
