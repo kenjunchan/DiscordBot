@@ -123,18 +123,22 @@ function isInDB(arguments, receivedMessage) {
 	return true;
 }
 
-function testCommand(arguments, receivedMessage) {
+async function testCommand(arguments, receivedMessage) {
 	if(receivedMessage.author.id != testerID){
 		return;
 	}
-	receivedMessage.channel.send("Hello World");
-	receivedMessage.delete();
+	//let summoner = await getSummonerFromName(arguments[0]);
+	//console.log(summoner['id'])
+	let SoloqStats = await getSoloQStatsFromSummonerID(await getSummonerIDFromSummoner(await getSummonerFromName([arguments[0]])));
+	//console.log(SoloqStats);
+	//SoloqStats.length
+
 }
 //*****************************************************************************************************************************
 //RIOT API STUFF
 async function getSummonerFromName(summonerName) {
 	let getSummonerData = async () => {
-		let summonerDataAPI = "https://na1.api.riotgames.com/lol/summoner/v4/summoners/by-name/" + arguments[0] + "?api_key=" + riotAPIKey;
+		let summonerDataAPI = "https://na1.api.riotgames.com/lol/summoner/v4/summoners/by-name/" + summonerName + "?api_key=" + riotAPIKey;
 		let response = await axios.get(summonerDataAPI);
 		let summonerData = response.data
 		return summonerData;
@@ -142,6 +146,33 @@ async function getSummonerFromName(summonerName) {
 	let summoner = await getSummonerData();
 	return summoner;
 }
+
+async function getSummonerIDFromSummoner(summoner){
+	let summonerID = summoner['id']
+	return summonerID;
+}
+
+async function getSoloQStatsFromSummonerID(summonerID){
+	let getSoloqStats = async () => {
+		let summonerDataAPI = "https://na1.api.riotgames.com/lol/league/v4/entries/by-summoner/" + summonerID + "?api_key=" + riotAPIKey;
+		let response = await axios.get(summonerDataAPI);
+		let summonerData = response.data
+		return summonerData;
+	}
+	let SoloqStats = await getSoloqStats();
+
+	let SOLOQ = null;
+	var i;
+	for(i = 0; i < SoloqStats.length; i++){
+		if(SoloqStats[i]['queueType'] == 'RANKED_SOLO_5x5'){
+			SOLOQ = SoloqStats[i];
+		}
+	}
+	//console.log(SOLOQ);
+
+	return SOLOQ;
+}
+
 
 async function getMatchListFromSummoner(summoner) {
 	let getMatchList = async () => {
