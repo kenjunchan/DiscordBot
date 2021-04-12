@@ -8,6 +8,7 @@ const Discord = require('discord.js')
 const client = new Discord.Client();
 client.login("") //Discord Token Here
 const riotAPIKey = ""; //Riotgames API key here
+const riotTFTAPIKey = ""; //Riotgames TFT API key here
 const testerID = "125805688797659138";
 const ytdl = require("ytdl-core");
 const axios = require('axios');
@@ -23,7 +24,8 @@ const testCommands = ["test", "t"];
 const helpCommands = ["help"];
 const opggCommands = ["opgg", "op.gg"];
 const allOpggCommands = ["aopgg", "a.op.gg"];
-const statsCommands = ["stats", "stat", "s"];
+const soloQStatsCommands = ["soloq", "solo", "s"];
+const tftQStatsCommands = ["tftq", "tft"];
 const championCommands = ["champ", "ch"];
 const memeifyCommands = ["meme", "me"];
 const pogPlantImageCommands = ["pogplant", "pp"];
@@ -32,7 +34,7 @@ const dogCommands = ["dog"];
 const coinflipCommands = ["coin", "c"]
 const emptyCommands = [""];
 
-const allCommands = [testCommands, helpCommands, opggCommands, allOpggCommands, statsCommands, championCommands, memeifyCommands, pogPlantImageCommands, magic8BallCommands, dogCommands, coinflipCommands, emptyCommands];
+const allCommands = [testCommands, helpCommands, opggCommands, allOpggCommands, soloQStatsCommands, tftQStatsCommands, championCommands, memeifyCommands, pogPlantImageCommands, magic8BallCommands, dogCommands, coinflipCommands, emptyCommands];
 
 //Load Database
 const database = new Datastore('pogplantdatastore.db');
@@ -46,7 +48,7 @@ client.on('ready', () => {
 	console.log("DiscordBot Started")
 	console.log("Setting Automatic Database Compaction to " + dbCompactInterval + " ms")
 	database.persistence.setAutocompactionInterval(dbCompactInterval)
-	//globalCronjobs()
+	globalCronjobs()
 })
 
 client.on('message', (receivedMessage) => {
@@ -135,7 +137,81 @@ async function testCommand(arguments, receivedMessage) {
 	if(receivedMessage.author.id != testerID){
 		return;
 	}
+	let SoloqStats = await getTFTQStatsFromSummonerID(await getSummonerIDFromSummoner(await getTFTFromName([arguments.join('')])));
+	//console.log(SoloqStats)
+	if(SoloqStats == null){
+		receivedMessage.channel.send("Summoner Not Found");
+	}
 
+	const embedMessage = new Discord.MessageEmbed()
+		.setAuthor(SoloqStats['summonerName'])													
+	
+	let rankedIconURL = "https://i.imgur.com/XXsF8SZ.png" // default silver
+	let colorHEX = "#A0B5BA" // default silver
+	let eTitle = ""
+	let eDesc = ""
+	switch(SoloqStats['tier']){
+		case 'IRON':
+			eTitle += "Iron " + SoloqStats['rank']
+			colorHEX = "#4F4F4F"
+			rankedIconURL = "https://i.imgur.com/93pc8Ws.png"
+			break;
+		case 'BRONZE':
+			eTitle += "Bronze " + SoloqStats['rank']
+			colorHEX = "#A4855C"
+			rankedIconURL = "https://i.imgur.com/xBcS66N.png"
+			break;
+		case 'SILVER':
+			eTitle += "Silver " + SoloqStats['rank']
+			colorHEX = "#A0B5BA"
+			rankedIconURL = "https://i.imgur.com/XXsF8SZ.png"
+			break;
+		case 'GOLD':
+			eTitle += "Gold " + SoloqStats['rank']
+			colorHEX = "#EAB249"
+			rankedIconURL = "https://i.imgur.com/bvySBsx.png"
+			break;
+		case 'PLATINUM':
+			eTitle += "Platinum " + SoloqStats['rank']
+			colorHEX = "#5ABBCC"
+			rankedIconURL = "https://i.imgur.com/jpOdDbY.png"
+			break;
+		case 'DIAMOND':
+			eTitle += "Diamond " + SoloqStats['rank']
+			colorHEX = "#7187FF"
+			rankedIconURL = "https://i.imgur.com/XSV2xSV.png"
+			break;
+		case 'MASTER':
+			eTitle += "Master"
+			colorHEX = "#E971FF"
+			rankedIconURL = "https://i.imgur.com/rZbl7e3.png"
+			break;
+		case 'GRANDMASTER':
+			eTitle += "Grandmaster"
+			colorHEX = "#FF7171"
+			rankedIconURL = "https://imgur.com/LBw0aFo.png"
+			break;
+		case 'CHALLENGER':
+			eTitle += "Challenger"
+			colorHEX = "#FFE07B"
+			rankedIconURL = "https://imgur.com/RuQsAWD.png"
+			break;
+		default:
+			eTitle += "Error"
+			break;
+	}
+
+	eTitle += ", " + SoloqStats['leaguePoints'] + " LP"
+	embedMessage.setTitle(eTitle);
+	embedMessage.setThumbnail(rankedIconURL);
+	//let winrateString = (Math.floor(getWinrate(SoloqStats['wins'], SoloqStats['losses']) * 100) + "% WR");
+	//eDesc += SoloqStats['wins'] + "W " + SoloqStats['losses'] + "L | " + winrateString
+	embedMessage.setDescription(eDesc);
+	embedMessage.setFooter("Requested by: " + receivedMessage.author.username); //remopve trhis
+	embedMessage.setColor(colorHEX);
+	receivedMessage.channel.send(embedMessage);
+	receivedMessage.delete();
+	
 
 }
 //*****************************************************************************************************************************
@@ -143,6 +219,18 @@ async function testCommand(arguments, receivedMessage) {
 async function getSummonerFromName(summonerName) {
 	let getSummonerData = async () => {
 		let summonerDataAPI = "https://na1.api.riotgames.com/lol/summoner/v4/summoners/by-name/" + summonerName + "?api_key=" + riotAPIKey;
+		let response = await axios.get(summonerDataAPI);
+		let summonerData = response.data
+		return summonerData;
+	};
+	let summoner = await getSummonerData();
+	//console.log(summoner)
+	return summoner;
+}
+
+async function getTFTSummonerFromName(summonerName) {
+	let getSummonerData = async () => {
+		let summonerDataAPI = "https://na1.api.riotgames.com/tft/summoner/v1/summoners/by-name/" + summonerName + "?api_key=" + riotTFTAPIKey;
 		let response = await axios.get(summonerDataAPI);
 		let summonerData = response.data
 		return summonerData;
@@ -176,6 +264,25 @@ async function getSoloQStatsFromSummonerID(summonerID){
 	return SOLOQ;
 }
 
+async function getTFTQStatsFromSummonerID(summonerID){
+	let getTFTqStats = async () => {
+		let summonerDataAPI = "https://na1.api.riotgames.com/tft/league/v1/entries/by-summoner/" + summonerID + "?api_key=" + riotTFTAPIKey;
+		let response = await axios.get(summonerDataAPI);
+		let summonerData = response.data
+		return summonerData;
+	}
+	let TFTqStats = await getTFTqStats();
+
+	let TFTQ = null;
+	var i;
+	for(i = 0; i < TFTqStats.length; i++){
+		if(TFTqStats[i]['queueType'] == 'RANKED_TFT'){
+			TFTQ = TFTqStats[i];
+		}
+	}
+	//console.log(TFTQ)
+	return TFTQ;
+}
 
 async function getMatchListFromSummoner(summoner) {
 	let getMatchList = async () => {
@@ -186,7 +293,7 @@ async function getMatchListFromSummoner(summoner) {
 		return matchlistData;
 	};
 	let matchlist = await getMatchList();
-	console.log(matchlist.matches);
+	//console.log(matchlist.matches);
 	return matchlist.matches;
 }
 
@@ -255,8 +362,11 @@ function processCommand(receivedMessage) {
 			case "aopgg":
 				allOpggCommand(arguments, receivedMessage)
 				break;
-			case "stats":
-				statsCommand(arguments, receivedMessage)
+			case "soloq":
+				soloQStats(arguments, receivedMessage)
+				break;
+			case "tftq":
+				tftQStats(arguments, receivedMessage)
 				break;
 			case "champ":
 				champggCommand(arguments, receivedMessage)
@@ -369,7 +479,7 @@ function champggCommand(arguments, receivedMessage) {
 	}
 }
 
-async function statsCommand(arguments,  receivedMessage){
+async function soloQStats(arguments,  receivedMessage){
 	let SoloqStats = await getSoloQStatsFromSummonerID(await getSummonerIDFromSummoner(await getSummonerFromName([arguments.join('')])));
 	if(SoloqStats == null){
 		receivedMessage.channel.send("Summoner Not Found");
@@ -439,7 +549,85 @@ async function statsCommand(arguments,  receivedMessage){
 	let winrateString = (Math.floor(getWinrate(SoloqStats['wins'], SoloqStats['losses']) * 100) + "% WR");
 	eDesc += SoloqStats['wins'] + "W " + SoloqStats['losses'] + "L | " + winrateString
 	embedMessage.setDescription(eDesc);
-	embedMessage.setFooter("Requested by: " + receivedMessage.author.username);
+	embedMessage.setFooter("Ranked Solo/Duo");
+	embedMessage.setColor(colorHEX);
+	receivedMessage.channel.send(embedMessage);
+	receivedMessage.delete();
+}
+
+async function tftQStats(arguments, receivedMessage){
+	let SoloqStats = await getTFTQStatsFromSummonerID(await getSummonerIDFromSummoner(await getTFTSummonerFromName([arguments.join('')])));
+	//console.log(SoloqStats)
+	if(SoloqStats == null){
+		receivedMessage.channel.send("Summoner Not Found");
+	}
+
+	const embedMessage = new Discord.MessageEmbed()
+		.setAuthor(SoloqStats['summonerName'])													
+	
+	let rankedIconURL = "https://i.imgur.com/XXsF8SZ.png" // default silver
+	let colorHEX = "#A0B5BA" // default silver
+	let eTitle = ""
+	let eDesc = ""
+	switch(SoloqStats['tier']){
+		case 'IRON':
+			eTitle += "Iron " + SoloqStats['rank']
+			colorHEX = "#4F4F4F"
+			rankedIconURL = "https://i.imgur.com/93pc8Ws.png"
+			break;
+		case 'BRONZE':
+			eTitle += "Bronze " + SoloqStats['rank']
+			colorHEX = "#A4855C"
+			rankedIconURL = "https://i.imgur.com/xBcS66N.png"
+			break;
+		case 'SILVER':
+			eTitle += "Silver " + SoloqStats['rank']
+			colorHEX = "#A0B5BA"
+			rankedIconURL = "https://i.imgur.com/XXsF8SZ.png"
+			break;
+		case 'GOLD':
+			eTitle += "Gold " + SoloqStats['rank']
+			colorHEX = "#EAB249"
+			rankedIconURL = "https://i.imgur.com/bvySBsx.png"
+			break;
+		case 'PLATINUM':
+			eTitle += "Platinum " + SoloqStats['rank']
+			colorHEX = "#5ABBCC"
+			rankedIconURL = "https://i.imgur.com/jpOdDbY.png"
+			break;
+		case 'DIAMOND':
+			eTitle += "Diamond " + SoloqStats['rank']
+			colorHEX = "#7187FF"
+			rankedIconURL = "https://i.imgur.com/XSV2xSV.png"
+			break;
+		case 'MASTER':
+			eTitle += "Master"
+			colorHEX = "#E971FF"
+			rankedIconURL = "https://i.imgur.com/rZbl7e3.png"
+			break;
+		case 'GRANDMASTER':
+			eTitle += "Grandmaster"
+			colorHEX = "#FF7171"
+			rankedIconURL = "https://imgur.com/LBw0aFo.png"
+			break;
+		case 'CHALLENGER':
+			eTitle += "Challenger"
+			colorHEX = "#FFE07B"
+			rankedIconURL = "https://imgur.com/RuQsAWD.png"
+			break;
+		default:
+			eTitle += "Error"
+			break;
+	}
+
+	eTitle += ", " + SoloqStats['leaguePoints'] + " LP"
+	embedMessage.setTitle(eTitle);
+	embedMessage.setThumbnail(rankedIconURL);
+	let winrateString = (Math.floor(getWinrate(SoloqStats['wins'], SoloqStats['losses']) * 100) + "% WR");
+	eDesc += "Winrate | " + winrateString + "\n"
+	eDesc += SoloqStats['wins'] + "W " + SoloqStats['losses'] + "L\n"
+	embedMessage.setDescription(eDesc);
+	embedMessage.setFooter("Ranked TFT");
 	embedMessage.setColor(colorHEX);
 	receivedMessage.channel.send(embedMessage);
 	receivedMessage.delete();
