@@ -16,6 +16,8 @@ const Datastore = require('nedb');
 var schedule = require('node-schedule');
 const table = require('table');
 
+const tiktokChannel = "848067671224221696";
+
 //var lastSentMsg;
 var servers = {};
 var bannedWords = ["<:pepering:760989004244975641>", "💍"];
@@ -43,12 +45,12 @@ database.loadDatabase();
 const dbCompactInterval = 60000; //number in miliseconds
 //*****************************************************************************************************************************
 client.on('ready', () => {
-	client.user.setActivity("OwO")
+	client.user.setActivity("meow >w<")
 	listAllConnectedServersAndChannels()
 	console.log("DiscordBot Started")
 	console.log("Setting Automatic Database Compaction to " + dbCompactInterval + " ms")
 	database.persistence.setAutocompactionInterval(dbCompactInterval)
-	globalCronjobs()
+	//globalCronjobs()
 })
 
 client.on('message', (receivedMessage) => {
@@ -60,6 +62,10 @@ client.on('message', (receivedMessage) => {
 	}
 	if (receivedMessage.content.includes(client.user.toString())) { //if bot is tagged in message
 		//does nothing
+	}
+	let re = RegExp("https://vm.tiktok.com/\\w{9}/"); //this eneds to be improved so that it just searches if the message contains this re and not exact matching
+	if(receivedMessage.channel == tiktokChannel && re.test(receivedMessage.content)){
+		receivedMessage.react('👍').then(() => receivedMessage.react('👎'));
 	}
 })
 
