@@ -9,14 +9,16 @@ const client = new Discord.Client();
 client.login("") //Discord Token Here
 const riotAPIKey = ""; //Riotgames API key here
 const riotTFTAPIKey = ""; //Riotgames TFT API key here
+const league_version = "11.13.1"; // current league of legends version
 const testerID = "125805688797659138";
+
 const ytdl = require("ytdl-core");
 const axios = require('axios');
 const Datastore = require('nedb');
 var schedule = require('node-schedule');
 const table = require('table');
 
-const tiktokChannel = "848067671224221696";
+const tiktokChannel = "758387764751499294";
 
 //var lastSentMsg;
 var servers = {};
@@ -64,7 +66,7 @@ client.on('message', (receivedMessage) => {
 		//does nothing
 	}
 	let re = RegExp("https://vm.tiktok.com/\\w{9}/"); //this eneds to be improved so that it just searches if the message contains this re and not exact matching
-	if(receivedMessage.channel == tiktokChannel && re.test(receivedMessage.content)){
+	if (receivedMessage.channel == tiktokChannel && re.test(receivedMessage.content)) {
 		receivedMessage.react('👍').then(() => receivedMessage.react('👎'));
 	}
 })
@@ -132,31 +134,31 @@ function isInDB(arguments, receivedMessage) {
 	return true;
 }
 
-function getWinrate(wins, losses){
-	if((wins + losses) == 0){
+function getWinrate(wins, losses) {
+	if ((wins + losses) == 0) {
 		return 0;
 	}
-	return (wins/(wins + losses));
+	return (wins / (wins + losses));
 }
 
 async function testCommand(arguments, receivedMessage) {
-	if(receivedMessage.author.id != testerID){
+	if (receivedMessage.author.id != testerID) {
 		return;
 	}
 	let SoloqStats = await getTFTQStatsFromSummonerID(await getSummonerIDFromSummoner(await getTFTFromName([arguments.join('')])));
 	//console.log(SoloqStats)
-	if(SoloqStats == null){
+	if (SoloqStats == null) {
 		receivedMessage.channel.send("Summoner Not Found");
 	}
 
 	const embedMessage = new Discord.MessageEmbed()
-		.setAuthor(SoloqStats['summonerName'])													
-	
+		.setAuthor(SoloqStats['summonerName'])
+
 	let rankedIconURL = "https://i.imgur.com/XXsF8SZ.png" // default silver
 	let colorHEX = "#A0B5BA" // default silver
 	let eTitle = ""
 	let eDesc = ""
-	switch(SoloqStats['tier']){
+	switch (SoloqStats['tier']) {
 		case 'IRON':
 			eTitle += "Iron " + SoloqStats['rank']
 			colorHEX = "#4F4F4F"
@@ -217,7 +219,7 @@ async function testCommand(arguments, receivedMessage) {
 	embedMessage.setColor(colorHEX);
 	receivedMessage.channel.send(embedMessage);
 	receivedMessage.delete();
-	
+
 
 }
 //*****************************************************************************************************************************
@@ -245,12 +247,12 @@ async function getTFTSummonerFromName(summonerName) {
 	return summoner;
 }
 
-async function getSummonerIDFromSummoner(summoner){
+async function getSummonerIDFromSummoner(summoner) {
 	let summonerID = summoner['id']
 	return summonerID;
 }
 
-async function getSoloQStatsFromSummonerID(summonerID){
+async function getSoloQStatsFromSummonerID(summonerID) {
 	let getSoloqStats = async () => {
 		let summonerDataAPI = "https://na1.api.riotgames.com/lol/league/v4/entries/by-summoner/" + summonerID + "?api_key=" + riotAPIKey;
 		let response = await axios.get(summonerDataAPI);
@@ -261,8 +263,8 @@ async function getSoloQStatsFromSummonerID(summonerID){
 
 	let SOLOQ = null;
 	var i;
-	for(i = 0; i < SoloqStats.length; i++){
-		if(SoloqStats[i]['queueType'] == 'RANKED_SOLO_5x5'){
+	for (i = 0; i < SoloqStats.length; i++) {
+		if (SoloqStats[i]['queueType'] == 'RANKED_SOLO_5x5') {
 			SOLOQ = SoloqStats[i];
 		}
 	}
@@ -270,7 +272,7 @@ async function getSoloQStatsFromSummonerID(summonerID){
 	return SOLOQ;
 }
 
-async function getTFTQStatsFromSummonerID(summonerID){
+async function getTFTQStatsFromSummonerID(summonerID) {
 	let getTFTqStats = async () => {
 		let summonerDataAPI = "https://na1.api.riotgames.com/tft/league/v1/entries/by-summoner/" + summonerID + "?api_key=" + riotTFTAPIKey;
 		let response = await axios.get(summonerDataAPI);
@@ -281,8 +283,8 @@ async function getTFTQStatsFromSummonerID(summonerID){
 
 	let TFTQ = null;
 	var i;
-	for(i = 0; i < TFTqStats.length; i++){
-		if(TFTqStats[i]['queueType'] == 'RANKED_TFT'){
+	for (i = 0; i < TFTqStats.length; i++) {
+		if (TFTqStats[i]['queueType'] == 'RANKED_TFT') {
 			TFTQ = TFTqStats[i];
 		}
 	}
@@ -485,20 +487,21 @@ function champggCommand(arguments, receivedMessage) {
 	}
 }
 
-async function soloQStats(arguments,  receivedMessage){
-	let SoloqStats = await getSoloQStatsFromSummonerID(await getSummonerIDFromSummoner(await getSummonerFromName([arguments.join('')])));
-	if(SoloqStats == null){
+async function soloQStats(arguments, receivedMessage) {
+	let Summoner = await getSummonerFromName([arguments.join('')]);
+	let SoloqStats = await getSoloQStatsFromSummonerID(await getSummonerIDFromSummoner(Summoner));
+	if (SoloqStats == null) {
 		receivedMessage.channel.send("Summoner Not Found");
 	}
 
 	const embedMessage = new Discord.MessageEmbed()
-		.setAuthor(SoloqStats['summonerName'])													
-	
+		.setAuthor(SoloqStats['summonerName'], "https://ddragon.leagueoflegends.com/cdn/" + league_version + "/img/profileicon/" + Summoner['profileIconId'] + ".png");
+
 	let rankedIconURL = "https://i.imgur.com/XXsF8SZ.png" // default silver
 	let colorHEX = "#A0B5BA" // default silver
 	let eTitle = ""
 	let eDesc = ""
-	switch(SoloqStats['tier']){
+	switch (SoloqStats['tier']) {
 		case 'IRON':
 			eTitle += "Iron " + SoloqStats['rank']
 			colorHEX = "#4F4F4F"
@@ -550,6 +553,7 @@ async function soloQStats(arguments,  receivedMessage){
 	}
 
 	eTitle += ", " + SoloqStats['leaguePoints'] + " LP"
+
 	embedMessage.setTitle(eTitle);
 	embedMessage.setThumbnail(rankedIconURL);
 	let winrateString = (Math.floor(getWinrate(SoloqStats['wins'], SoloqStats['losses']) * 100) + "% WR");
@@ -561,21 +565,21 @@ async function soloQStats(arguments,  receivedMessage){
 	receivedMessage.delete();
 }
 
-async function tftQStats(arguments, receivedMessage){
-	let SoloqStats = await getTFTQStatsFromSummonerID(await getSummonerIDFromSummoner(await getTFTSummonerFromName([arguments.join('')])));
-	//console.log(SoloqStats)
-	if(SoloqStats == null){
+async function tftQStats(arguments, receivedMessage) {
+	let Summoner = await getTFTSummonerFromName([arguments.join('')]);
+	let SoloqStats = await getTFTQStatsFromSummonerID(await getSummonerIDFromSummoner(Summoner));
+	if (SoloqStats == null) {
 		receivedMessage.channel.send("Summoner Not Found");
 	}
 
 	const embedMessage = new Discord.MessageEmbed()
-		.setAuthor(SoloqStats['summonerName'])													
-	
+		.setAuthor(SoloqStats['summonerName'], "https://ddragon.leagueoflegends.com/cdn/" + league_version + "/img/profileicon/" + Summoner['profileIconId'] + ".png");
+
 	let rankedIconURL = "https://i.imgur.com/XXsF8SZ.png" // default silver
 	let colorHEX = "#A0B5BA" // default silver
 	let eTitle = ""
 	let eDesc = ""
-	switch(SoloqStats['tier']){
+	switch (SoloqStats['tier']) {
 		case 'IRON':
 			eTitle += "Iron " + SoloqStats['rank']
 			colorHEX = "#4F4F4F"
