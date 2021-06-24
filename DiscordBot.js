@@ -489,6 +489,7 @@ function champggCommand(arguments, receivedMessage) {
 
 async function soloQStats(arguments, receivedMessage) {
 	let Summoner = await getSummonerFromName([arguments.join('')]);
+	console.log(Summoner);
 	let SoloqStats = await getSoloQStatsFromSummonerID(await getSummonerIDFromSummoner(Summoner));
 	if (SoloqStats == null) {
 		receivedMessage.channel.send("Summoner Not Found");
@@ -558,7 +559,9 @@ async function soloQStats(arguments, receivedMessage) {
 	embedMessage.setThumbnail(rankedIconURL);
 	let winrateString = (Math.floor(getWinrate(SoloqStats['wins'], SoloqStats['losses']) * 100) + "% WR");
 	eDesc += SoloqStats['wins'] + "W " + SoloqStats['losses'] + "L | " + winrateString
-	embedMessage.setDescription(eDesc);
+	let sumname = Summoner['name'].replace(/ +/g, "");
+	let opgglink = "https://na.op.gg/summoner/userName=" + sumname;
+	embedMessage.setDescription(eDesc + "\n[OPGG](" + opgglink + ")");
 	embedMessage.setFooter("Ranked Solo/Duo");
 	embedMessage.setColor(colorHEX);
 	receivedMessage.channel.send(embedMessage);
